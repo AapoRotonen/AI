@@ -1,0 +1,15 @@
+spring:
+  ai:
+    openai:
+      api-key: supportai-disabled
+    vectorstore:
+      pgvector:
+        initialize-schema: false
+  jpa:
+    hibernate:
+      ddl-auto: validate
+supportai:
+  ai:
+    api-key: supportai-disabled
+  jwt:
+    secret: test-only-secret-value-that-is-at-least-thirty-two-bytes

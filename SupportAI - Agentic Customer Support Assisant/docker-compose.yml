@@ -1,0 +1,50 @@
+services:
+  db:
+    image: supportai-postgres:local
+    build:
+      context: .
+      dockerfile: Dockerfile.database
+    environment:
+      POSTGRES_DB: supportai
+      POSTGRES_USER: ${DB_USERNAME:-supportai}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env before starting the app}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - supportai-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-supportai} -d supportai"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  app:
+    build: .
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/supportai
+      DB_USERNAME: ${DB_USERNAME:-supportai}
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env before starting the app}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env before starting the app}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-supportai-disabled}
+      OPENAI_CHAT_MODEL: ${OPENAI_CHAT_MODEL:-gpt-5.4-mini}
+      OPENAI_EMBEDDING_MODEL: ${OPENAI_EMBEDDING_MODEL:-text-embedding-3-small}
+      DEMO_AGENT_PASSWORD: ${DEMO_AGENT_PASSWORD:-AgentDemo123!}
+      DEMO_SENIOR_PASSWORD: ${DEMO_SENIOR_PASSWORD:-SeniorDemo123!}
+      DEMO_OTHER_PASSWORD: ${DEMO_OTHER_PASSWORD:-OtherDemo123!}
+    ports:
+      - "127.0.0.1:8080:8080"
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    pids_limit: 128
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  supportai-postgres:

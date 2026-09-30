@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#132431">
+  <title>SupportAI — Support operations</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/"><span class="brand-mark">S</span><span>SupportAI<small>SUPPORT OPERATIONS</small></span></a>
+    <div id="user-bar" class="user-bar hidden"><span id="whoami"></span><button id="logout" class="button button-quiet">Sign out</button></div>
+  </header>
+
+  <main>
+    <section id="login-panel" class="login-layout">
+      <div class="intro">
+        <p class="eyebrow">AI COPILOT FOR SUPPORT TEAMS</p>
+        <h1>Turn ticket evidence<br>into the next best step.</h1>
+        <p class="lead">Investigate customer issues with bounded business tools, internal policy search, and human review for actions.</p>
+        <div class="pill-row"><span>Ticket context</span><span>Internal knowledge</span><span>Human oversight</span></div>
+      </div>
+      <form id="login-form" class="card login-card">
+        <h2>Welcome back</h2><p class="muted">Sign in with a demo support account.</p>
+        <label>Email<input id="email" type="email" autocomplete="username" value="agent@supportai.demo" required></label>
+        <label>Password<input id="password" type="password" autocomplete="current-password" value="AgentDemo123!" required></label>
+        <button class="button button-primary" type="submit">Sign in <span aria-hidden="true">→</span></button>
+        <p id="login-error" class="message error hidden" role="alert"></p>
+        <p class="fine-print">Fictional portfolio demo · Never enter real customer information</p>
+      </form>
+    </section>
+
+    <section id="app-panel" class="app-panel hidden">
+      <div class="page-heading"><div><p class="eyebrow">SUPPORT WORKSPACE</p><h1>Good day. What needs attention?</h1></div><div class="status-chip"><i></i> Secure session</div></div>
+      <nav class="tabs" aria-label="Workspace views"><button class="tab active" data-view="tickets">Tickets <span id="ticket-count">0</span></button><button class="tab" data-view="reviews">Human reviews <span id="review-count">0</span></button></nav>
+
+      <section id="tickets-view" class="workspace-grid">
+        <aside class="card ticket-pane"><div class="section-title"><div><p class="eyebrow">YOUR QUEUE</p><h2>Ticket queue</h2></div><button id="refresh-tickets" class="icon-button" title="Refresh tickets" aria-label="Refresh tickets">↻</button></div><div id="ticket-list" class="ticket-list"></div></aside>
+        <section class="card detail-pane"><div id="ticket-empty" class="empty-state"><div class="empty-icon">⌕</div><h2>Select a ticket</h2><p>Review the customer context and ask SupportAI to investigate.</p></div><div id="ticket-detail" class="hidden"></div></section>
+        <aside class="card assistant-pane"><div class="assistant-head"><div class="ai-mark">✳</div><div><p class="eyebrow">SUPPORTAI COPILOT</p><h2>Investigation</h2></div><span id="ai-state" class="ai-state">Ready</span></div><p id="assistant-hint" class="muted small">Select a ticket to give the assistant useful context.</p><div id="chat-transcript" class="chat-transcript" aria-live="polite"></div><form id="assistant-form" class="assistant-form"><textarea id="assistant-message" rows="3" maxlength="1200" placeholder="Ask about this ticket…" required></textarea><div class="composer-row"><span>Evidence based · Approval required for changes</span><button class="button button-primary" type="submit" aria-label="Send message">↑</button></div></form></aside>
+      </section>
+
+      <section id="reviews-view" class="card reviews-pane hidden"><div class="section-title"><div><p class="eyebrow">HUMAN-IN-THE-LOOP</p><h2>Action proposals</h2><p class="muted">Sensitive ticket actions remain pending until a senior reviewer decides.</p></div><button id="refresh-reviews" class="button button-secondary">Refresh</button></div><div id="review-list" class="review-list"></div></section>
+    </section>
+    <div id="toast" class="toast hidden" role="status"></div>
+  </main>
+  <footer><span>SUPPORTAI · FICTIONAL DEMO DATA</span><span>AI reasons over evidence. Java enforces access. People approve actions.</span></footer>
+</body>
+</html>
