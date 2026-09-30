@@ -18,14 +18,26 @@
   <main class="privacy-page">
     <a class="privacy-back" href="index.html">← Takaisin Koivu Storeen</a>
     <p class="kicker">DEMOVERSION TIETOSUOJA</p>
-    <h1>Tietoa chatin käsittelystä</h1>
-    <p class="privacy-callout"><strong>Tämä on demo, ei valmis asiakaspalvelukanava.</strong> Älä lähetä henkilötietoja, tilaustunnuksia, maksu- tai muita yksityisiä asiakastietoja.</p>
-    <h2>Mihin viestisi lähetetään?</h2>
-    <p>Chat-viesti ja keskustelun viimeiset viestit käsitellään tämän demon backendissä ja välitetään OpenAI API:lle kysymyksen luokittelua ja vastauksen muodostamista varten. Tuotehaussa kysymys lähetetään OpenAI Embeddings API:lle. Jos agentti siirtyy verkkohakuun, kysymys lähetetään myös Tavily-palveluun. Verkkohakua ei käytetä jokaisessa viestissä.</p>
-    <p>Keskustelua säilytetään selaimessa vain sivun aukiolon ajan; demo ei tallenna sitä omaan pysyvään tietokantaan. Ostoskori ja suosikit tallentuvat selaimen paikalliseen tallennustilaan. Tuotekuvia ladataan Unsplashista. Palvelinympäristö tai ulkoiset palveluntarjoajat voivat käsitellä omia teknisiä loki- tai palvelutietojaan. Tarkista kyseisten palveluiden ehdot ennen oikeiden asiakkaiden tietojen käsittelyä.</p>
-    <h2>Rekisterinpitäjän tiedot</h2>
-    <p>Tämä demoversio ei vielä nimeä rekisterinpitäjää tai tietosuoja-asioiden yhteyspistettä. Nämä tiedot sekä käsittelyn tarkoitus, oikeusperuste, vastaanottajat ja säilytysajat on täydennettävä ennen oikeaa asiakaskäyttöä.</p>
-    <p>Projektin lähdekoodin tekninen kuvaus löytyy tiedostosta <code>PRIVACY.md</code>. Tämä demoteksti ei korvaa täydennettyä tietosuojailmoitusta. Ennen oikeaa käyttöä tietoja kerättäessä annettavan ilmoituksen vaatimukset on arvioitava esimerkiksi <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/?qid=1772981449498&amp;uri=CELEX%3A32016R0679" target="_blank" rel="noopener noreferrer">GDPR:n 13 artiklan</a> perusteella.</p>
+    <h1>Tietoa tietojen käsittelystä</h1>
+    <p class="privacy-callout"><strong>Tämä on portfolio- ja demoversio, ei valmis asiakaspalvelukanava.</strong> Älä käytä sitä oikeilla asiakkailla tai lähetä maksutietoja. Tilaustuen tiedot ovat vain paikallisia demotietoja.</p>
+
+    <h2>Tili ja kirjautuminen</h2>
+    <p>Rekisteröityessäsi sähköpostiosoitteesi tallennetaan sovelluksen paikalliseen tietokantaan. Salasanaa ei tallenneta sellaisenaan, vaan siitä muodostetaan suolattu tiiviste. Kirjautuminen käyttää selaimessa HttpOnly-istuntoevästettä; chat ei saa salasanaa tai istuntotunnistetta.</p>
+
+    <h2>Chat ja tekoälypalvelut</h2>
+    <p>Chat-viesti ja keskustelun viimeiset viestit käsitellään backendissä ja lähetetään OpenAI API:lle viestin tarkoituksen luokittelua sekä vastauksen muodostamista varten. Tuotehaussa kysymys lähetetään myös OpenAI Embeddings API:lle. Ajankohtaiseen yleistietoon siirrytään Tavily-hakuun vain, jos agentin reititys valitsee sen ja Tavily-avain on määritetty.</p>
+    <p>Älä kirjoita chattiin salasanoja, maksutietoja tai muiden henkilöiden yksityisiä tietoja. Tilausvastauksen haku tehdään backendissä kirjautuneen tilin perusteella; tilaustietoa ei lähetetä vastausta muodostavalle kielimallille. Tuote- ja verkkohakutekstiä käsitellään mallille annettaessa epäluotettavana sisältönä.</p>
+
+    <h2>Demotilaukset ja tukipyynnöt</h2>
+    <p>Omat demotilaukset ja tukipyynnöt tallennetaan paikalliseen SQLite-tietokantaan. Tilausviitteen haku rajataan kirjautuneen käyttäjän omiin tilauksiin. Ratkaisematon pyyntö voidaan tallentaa tukitapaukseksi, jota erikseen tunnistettu tukihenkilö voi käsitellä. Tukipyynnön yleisimmät sähköposti-, puhelin-, korttinumeron kaltaiset ja token-arvot yritetään peittää ennen tallennusta; tunnistus ei ole täydellinen.</p>
+    <p>Tukitapauksia ei poisteta automaattisesti. Sovelluksessa ei ole sähköposti-ilmoituksia, oikeaa tilausten käsittelyä, maksamista tai tuotantokaupan asiakastilejä.</p>
+
+    <h2>Lokit ja muu selaintallennus</h2>
+    <p>Sovelluksen tapahtumalokeihin tallennetaan teknisiä tietoja kuten pyyntötunnus, reitti, kesto, onnistuminen tai virhe sekä mahdollinen mallin ilmoittama token-määrä. Chat-viestejä, vastauksia, salasanoja, evästeitä tai API-avaimia ei kirjata näihin tapahtumalokeihin. Ostoskori ja suosikit tallentuvat selaimen paikalliseen tallennustilaan. Tuotekuvat haetaan Unsplashista.</p>
+    <p>Ulkopuolisten palveluiden käsittelypaikka, säilytys ja ehdot riippuvat käytössä olevista palvelutileistä. Tarkista palveluntarjoajien ajantasaiset ehdot ennen oikeiden henkilötietojen käsittelyä. Tämän demon teksti ei ole lakisääteinen tietosuojailmoitus.</p>
+
+    <h2>Tekninen kuvaus</h2>
+    <p>Projektin yksityiskohtainen tietosuojakuvaus löytyy kehittäjädokumentista docs/privacy.md. Ennen oikeaa käyttöä on määritettävä rekisterinpitäjä, yhteystiedot, käsittelyn tarkoitukset ja oikeusperusteet, vastaanottajat, säilytysajat ja käyttäjien oikeudet.</p>
   </main>
 </body>
 </html>

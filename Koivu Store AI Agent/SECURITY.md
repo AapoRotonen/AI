@@ -1,28 +1,19 @@
-# Tietoturva ja julkaisun tarkistuslista
+# Security
 
-Koivu Store AI Agent on demoprojekti. Ilmoita tietoturvaongelmasta ylläpitäjälle yksityisesti, kun projektilla on julkaistu yksityinen yhteydenottokanava. Älä julkaise haavoittuvuusraportissa API-avaimia, asiakkaiden tietoja tai käyttökelpoisia hyökkäysohjeita.
+Koivu Store is a local portfolio demo, not a production commerce service. Do not send real customer information or deploy the API publicly without a separate security review.
 
-## Nykyinen uhkamalli
+## Current controls
 
-- Backendin chat-reitit ovat anonyymejä ja voivat käynnistää maksullisia OpenAI-kutsuja. Pidä backend paikallisessa kehityksessä. Ennen julkista palvelua lisää reunapalveluun nopeus- ja pyyntökokorajat, väärinkäytön esto sekä palveluntarjoajan kustannusrajat. Lisää tunnistautuminen, jos API ei ole aidosti julkinen.
-- CORS-alkuperät rajataan `CORS_ALLOWED_ORIGINS`-asetuksella. Selaimen CORS-suojaus ei estä suoria HTTP-kutsuja eikä korvaa tunnistautumista.
-- Pyyntömalli rajoittaa viestin ja historiavuoron 4 000 merkkiin sekä historian 12 vuoroon. Julkisen palvelun edessä pitää lisäksi valvoa koko HTTP-pyynnön kokoa.
-- Malli näkee käyttäjän viestin ja haetun katalogi-/verkkohakutekstin. Mallille ei anneta työkalua, jolla se pääsisi koneen tiedostoihin tai tekisi tilausmuutoksia. Ulkoinen sisältö voi silti vaikuttaa mallin vastauksen sisältöön.
-- API-avaimet kuuluvat palvelimen ympäristöön tai paikalliseen `backend/.env`-tiedostoon. Käytä julkaisuympäristössä salaisuuksienhallintaa ja vähimmän oikeuden avaimia.
+- Authentication uses salted password hashes and revocable HttpOnly sessions.
+- Backend queries enforce ownership for orders and support cases.
+- The order tool is read-only and receives the authenticated user identity from FastAPI.
+- Support review and paid catalog initialization use separate server-side API keys.
+- Intent/evidence/answer model responses are structured and validated; graph routes are allowlisted in Python.
+- Retrieved catalogue and web content are treated as untrusted input.
+- Application logs exclude prompts, passwords, cookies, and API-key values.
 
-## Ennen Git-julkaisua
+## Before deployment
 
-- Tarkista Git-juuri, työpuu, stage ja aiempi historia. Älä lisää koko kansiota sokkona.
-- Varmista, ettei `.env`, token, loki, tietokanta, virtuaaliympäristö, cache, vanha ZIP tai henkilökohtainen tiedosto kuulu julkaisuun. `.gitignore` ei poista jo seurannassa olevia tiedostoja tai historiassa olevia salaisuuksia.
-- Käytä `backend/.env.example`-tiedostoa asetusten nimille; älä kopioi oikeita arvoja dokumentaatioon.
-- Valitse projektille lisenssi ennen kuin annat muille luvan käyttää koodia.
-- Tarkista riippuvuuspäivitykset ja lukitse tuotantoon asennettavat versiot ennen käyttöönottoa.
+The demo does not yet have rate limits, account lockout, MFA, per-operator staff identity, automated retention, encrypted database storage, backups, email verification, or a staff dashboard. Deploy only behind HTTPS, set COOKIE_SECURE=true, use exact CORS origins and a secrets manager, protect costly endpoints, and connect a real order service only after its authorization contract is reviewed.
 
-## Ennen internetiin julkaisemista
-
-- Käytä HTTPS:ää, rajattua CORS-listaa, pyyntöjen nopeus- ja kokorajoja, kustannuskiintiöitä sekä seurantaa, joka ei tallenna tarpeettomasti keskustelujen sisältöä.
-- Suojaa API autentikoinnilla tai julkiseen käyttöön sopivalla väärinkäytön torjunnalla. Rajoita ylläpito-/setup-toiminnot.
-- Tarkista avainten käyttöoikeudet, tietojen käsittelysopimukset ja tietosuojailmoitus. Älä pyydä demochatissa henkilötietoja, maksu- tai tilaustietoja.
-- Varmista, että kuvat, yhteystiedot, toimitus- ja palautuslupaukset vastaavat todellista palvelua.
-
-Jos salaisuus joskus lisätään Git-historiaan, poista se käytöstä palveluntarjoajalla ja luo uusi. Pelkkä tiedoston poistaminen myöhemmässä commitissa ei poista sitä historiasta.
+For detailed controls, API access rules, limitations, and reporting guidance, see [docs/security.md](docs/security.md).

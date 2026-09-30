@@ -1,0 +1,38 @@
+[
+  {
+    "id": "merino-care",
+    "question": "Voiko merinovillapaidan pestä koneessa?",
+    "expected_product_codes": ["KLS-001"],
+    "expected_facts": ["100 % merinovilla", "Konepesu 30 asteessa"]
+  },
+  {
+    "id": "linen-stock",
+    "question": "Minkä kokoisia Sage-värisiä pellavahousuja on saatavilla?",
+    "expected_product_codes": ["PLH-002"],
+    "expected_facts": ["Sage", "XS, S, M"]
+  },
+  {
+    "id": "belt-size",
+    "question": "Löytyykö mustaa nahkavyötä koossa 90 cm?",
+    "expected_product_codes": ["NVY-003"],
+    "expected_facts": ["Black", "90cm"]
+  },
+  {
+    "id": "cashmere-size",
+    "question": "Kuinka suuri Kasmirhuivi Luxe on?",
+    "expected_product_codes": ["KSH-004"],
+    "expected_facts": ["200cm x 70cm", "100% mongolialanen kasmir"]
+  },
+  {
+    "id": "denim-stock",
+    "question": "Onko Ecru-väristä denim-takkia vielä varastossa?",
+    "expected_product_codes": ["DTK-005"],
+    "expected_facts": ["Ecru", "loppuunmyyty"]
+  },
+  {
+    "id": "silk-composition",
+    "question": "Mistä silkkipaita Elegance on valmistettu?",
+    "expected_product_codes": ["SLK-006"],
+    "expected_facts": ["100% mulberry-silkki", "19 momme"]
+  }
+]

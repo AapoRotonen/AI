@@ -16,6 +16,11 @@ class Settings(BaseSettings):
     retrieval_top_k: int = 4
     max_iterations: int = 3
     cors_allowed_origins: str = "http://127.0.0.1:5500,http://localhost:5500"
+    database_path: str = "./koivu.sqlite3"
+    session_ttl_hours: int = 12
+    cookie_secure: bool = False
+    support_agent_api_key: str = ""
+    catalog_setup_api_key: str = ""
 
     class Config:
         env_file = ".env"
