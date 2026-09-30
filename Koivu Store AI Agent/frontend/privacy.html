@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="fi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f8f7f3">
+  <title>Tietosuojatiedot — Koivu Store demo</title>
+  <link rel="stylesheet" href="store.css">
+  <style>
+    .privacy-page{max-width:760px;margin:0 auto;padding:clamp(2rem,7vw,5rem) 1.25rem;color:#26352c;line-height:1.7}
+    .privacy-page h1,.privacy-page h2{font-family:Georgia,serif;font-weight:500;line-height:1.2}
+    .privacy-page h1{font-size:clamp(2.3rem,6vw,4rem)}.privacy-page h2{margin-top:2rem;font-size:1.5rem}
+    .privacy-page a{color:#315743}.privacy-back{display:inline-block;margin-bottom:2rem}
+    .privacy-callout{padding:1rem 1.2rem;background:#ebece3;border-radius:12px}
+  </style>
+</head>
+<body>
+  <main class="privacy-page">
+    <a class="privacy-back" href="index.html">← Takaisin Koivu Storeen</a>
+    <p class="kicker">DEMOVERSION TIETOSUOJA</p>
+    <h1>Tietoa chatin käsittelystä</h1>
+    <p class="privacy-callout"><strong>Tämä on demo, ei valmis asiakaspalvelukanava.</strong> Älä lähetä henkilötietoja, tilaustunnuksia, maksu- tai muita yksityisiä asiakastietoja.</p>
+    <h2>Mihin viestisi lähetetään?</h2>
+    <p>Chat-viesti ja keskustelun viimeiset viestit käsitellään tämän demon backendissä ja välitetään OpenAI API:lle kysymyksen luokittelua ja vastauksen muodostamista varten. Tuotehaussa kysymys lähetetään OpenAI Embeddings API:lle. Jos agentti siirtyy verkkohakuun, kysymys lähetetään myös Tavily-palveluun. Verkkohakua ei käytetä jokaisessa viestissä.</p>
+    <p>Keskustelua säilytetään selaimessa vain sivun aukiolon ajan; demo ei tallenna sitä omaan pysyvään tietokantaan. Ostoskori ja suosikit tallentuvat selaimen paikalliseen tallennustilaan. Tuotekuvia ladataan Unsplashista. Palvelinympäristö tai ulkoiset palveluntarjoajat voivat käsitellä omia teknisiä loki- tai palvelutietojaan. Tarkista kyseisten palveluiden ehdot ennen oikeiden asiakkaiden tietojen käsittelyä.</p>
+    <h2>Rekisterinpitäjän tiedot</h2>
+    <p>Tämä demoversio ei vielä nimeä rekisterinpitäjää tai tietosuoja-asioiden yhteyspistettä. Nämä tiedot sekä käsittelyn tarkoitus, oikeusperuste, vastaanottajat ja säilytysajat on täydennettävä ennen oikeaa asiakaskäyttöä.</p>
+    <p>Projektin lähdekoodin tekninen kuvaus löytyy tiedostosta <code>PRIVACY.md</code>. Tämä demoteksti ei korvaa täydennettyä tietosuojailmoitusta. Ennen oikeaa käyttöä tietoja kerättäessä annettavan ilmoituksen vaatimukset on arvioitava esimerkiksi <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/?qid=1772981449498&amp;uri=CELEX%3A32016R0679" target="_blank" rel="noopener noreferrer">GDPR:n 13 artiklan</a> perusteella.</p>
+  </main>
+</body>
+</html>
