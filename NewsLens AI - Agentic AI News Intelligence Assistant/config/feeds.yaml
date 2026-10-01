@@ -1,0 +1,15 @@
+# Public feeds are fetched as bounded RSS/Atom documents. Add or remove entries
+# here; feed ownership and source relationship are explicit metadata.
+feeds:
+  - name: arXiv cs.AI
+    url: https://export.arxiv.org/rss/cs.AI
+    source_type: PRIMARY
+    geography: GLOBAL
+  - name: arXiv cs.SE
+    url: https://export.arxiv.org/rss/cs.SE
+    source_type: PRIMARY
+    geography: GLOBAL
+  - name: TechCrunch AI
+    url: https://techcrunch.com/category/artificial-intelligence/feed/
+    source_type: INDEPENDENT_REPORTING
+    geography: GLOBAL

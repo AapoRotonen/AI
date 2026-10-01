@@ -1,0 +1,30 @@
+services:
+  db:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_DB: newslens
+      POSTGRES_USER: newslens
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-newslens-local-only}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - newslens-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U newslens -d newslens"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+
+  app:
+    build: .
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://newslens:${POSTGRES_PASSWORD:-newslens-local-only}@db:5432/newslens
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["sh", "-c", "newslens init-db && newslens bot"]
+
+volumes:
+  newslens-postgres:

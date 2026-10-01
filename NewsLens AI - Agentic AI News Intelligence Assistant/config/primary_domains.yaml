@@ -1,0 +1,21 @@
+domains:
+  - openai.com
+  - anthropic.com
+  - deepmind.google
+  - blog.google
+  - ai.meta.com
+  - microsoft.com
+  - nvidia.com
+  - arxiv.org
+  - huggingface.co
+  - aalto.fi
+  - helsinki.fi
+  - tekoalya.fi
+independent_reporting:
+  - techcrunch.com
+  - theverge.com
+  - wired.com
+  - reuters.com
+  - apnews.com
+  - yle.fi
+  - yle.com

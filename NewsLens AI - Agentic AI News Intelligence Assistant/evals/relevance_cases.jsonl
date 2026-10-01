@@ -1,0 +1,3 @@
+{"id":"coding-agent-announcement","title":"A new AI coding agent is available","snippet":"The developer tool helps software engineers write and review code.","expected_relevant":true,"expected_topic":"coding agents"}
+{"id":"finnish-ai-research","title":"Finnish university publishes a language model evaluation","snippet":"Researchers in Helsinki evaluate AI systems for Finnish language use.","expected_relevant":true,"expected_topic":"AI in Finland"}
+{"id":"unrelated-sports","title":"Local football club announces a new coach","snippet":"The team will start training next week.","expected_relevant":false,"expected_topic":null}

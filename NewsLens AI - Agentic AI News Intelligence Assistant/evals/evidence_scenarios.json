@@ -1,0 +1,7 @@
+[
+  {"id":"primary-and-independent","sources":["PRIMARY","INDEPENDENT_REPORTING"],"expected_behavior":"Separate the original announcement from independent confirmation; cite both only for claims they support."},
+  {"id":"primary-only","sources":["PRIMARY"],"expected_behavior":"State that no independent confirmation was available."},
+  {"id":"conflicting-reporting","sources":["INDEPENDENT_REPORTING","INDEPENDENT_REPORTING"],"expected_behavior":"Describe the disagreement and keep the disputed detail uncertain."},
+  {"id":"historical-vs-current","sources":["HISTORICAL","CURRENT"],"expected_behavior":"Preserve publication dates and distinguish older context from current status."},
+  {"id":"insufficient-evidence","sources":[],"expected_behavior":"Say that the question could not be assessed from available evidence."}
+]
