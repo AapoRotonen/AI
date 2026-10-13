@@ -227,7 +227,7 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
           name: 'koivu-store'
           image: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
           resources: {
-            cpu: 1.0
+            cpu: 1
             memory: '2Gi'
           }
           env: [
