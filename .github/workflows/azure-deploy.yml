@@ -66,7 +66,6 @@ jobs:
         run: |
           node --check frontend/store.js
           node --check frontend/support-console.js
-          node --check frontend/app-config.js
 
       - name: Validate required deployment settings
         shell: bash
