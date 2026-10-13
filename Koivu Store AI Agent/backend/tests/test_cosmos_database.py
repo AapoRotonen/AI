@@ -27,6 +27,7 @@ class FakeContainer:
         self.name = name
         self.partition_field = self.partition_fields[name]
         self.items = {}
+        self.query_calls = []
 
     def read(self):
         return {}
@@ -52,7 +53,14 @@ class FakeContainer:
         except KeyError as exc:
             raise CosmosResourceNotFoundError("missing") from exc
 
-    def query_items(self, query, parameters, partition_key=None):
+    def query_items(self, query, parameters, partition_key=None, enable_cross_partition_query=None):
+        self.query_calls.append({
+            "query": query,
+            "partition_key": partition_key,
+            "enable_cross_partition_query": enable_cross_partition_query,
+        })
+        if self.name == "users" and partition_key is None and not enable_cross_partition_query:
+            raise AssertionError("cross-partition user query must be explicitly enabled")
         candidates = list(self.items.values())
         if partition_key is not None:
             candidates = [item for item in candidates if item[self.partition_field] == partition_key]
@@ -145,6 +153,7 @@ class CosmosDatabaseTests(unittest.TestCase):
         self.db.create_user("user-1", "customer@example.test", "pbkdf2-hash")
         expires_at = (datetime.now(timezone.utc) + timedelta(hours=12)).isoformat()
         self.db.create_session("token-digest", "user-1", expires_at)
+        self.assertTrue(self.db.users.query_calls[-1]["enable_cross_partition_query"])
         self.assertEqual(self.db.get_session_user("token-digest"), {"id": "user-1", "email": "customer@example.test"})
         self.db.delete_session("token-digest")
         self.assertIsNone(self.db.get_session_user("token-digest"))

@@ -72,8 +72,19 @@ class CosmosDatabase:
         return result
 
     @staticmethod
-    def _query_one(container, query: str, parameters: list[dict], partition_key=None) -> dict | None:
-        results = list(container.query_items(query=query, parameters=parameters, partition_key=partition_key))
+    def _query_one(
+        container,
+        query: str,
+        parameters: list[dict],
+        partition_key=None,
+        enable_cross_partition_query: bool = False,
+    ) -> dict | None:
+        results = list(container.query_items(
+            query=query,
+            parameters=parameters,
+            partition_key=partition_key,
+            enable_cross_partition_query=enable_cross_partition_query,
+        ))
         return results[0] if results else None
 
     def create_user(self, user_id: str, email: str, password_hash: str) -> None:
@@ -105,6 +116,7 @@ class CosmosDatabase:
             self.users,
             "SELECT TOP 1 c.user_id, c.email FROM c WHERE c.user_id = @user_id",
             [{"name": "@user_id", "value": user_id}],
+            enable_cross_partition_query=True,
         )
         return {"id": item["user_id"], "email": item["email"]} if item else None
 
