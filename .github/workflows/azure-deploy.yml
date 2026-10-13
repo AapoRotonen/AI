@@ -1,0 +1,177 @@
+name: gated Azure deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: Choose the explicit deployment stage
+        required: true
+        type: choice
+        options:
+          - foundation
+          - application
+      confirm_deployment:
+        description: Confirm that this stage may provision/update Azure resources and incur charges
+        required: true
+        type: choice
+        options:
+          - no
+          - yes
+        default: no
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: koivu-azure-deployment
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: inputs.confirm_deployment == 'yes'
+    runs-on: ubuntu-latest
+    environment: azure-deployment
+    defaults:
+      run:
+        working-directory: "Koivu Store AI Agent"
+    env:
+      AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+      AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
+      AZURE_RESOURCE_SUFFIX: ${{ vars.AZURE_RESOURCE_SUFFIX }}
+      RAG_INDEX_BLOB_NAME: ${{ vars.RAG_INDEX_BLOB_NAME }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: Koivu Store AI Agent/backend/requirements*.txt
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install and run deterministic backend checks
+        run: |
+          python -m pip install -r backend/requirements-dev.txt
+          python -m compileall -q backend/main.py backend/agent backend/core backend/tests backend/evals backend/scripts
+          python -m unittest discover -s backend/tests -p "test_*.py" -v
+
+      - name: Check frontend JavaScript
+        run: |
+          node --check frontend/store.js
+          node --check frontend/support-console.js
+          node --check frontend/app-config.js
+
+      - name: Validate required deployment settings
+        shell: bash
+        run: |
+          set -euo pipefail
+          for value in AZURE_RESOURCE_GROUP AZURE_LOCATION AZURE_RESOURCE_SUFFIX AZURE_CLIENT_ID AZURE_TENANT_ID AZURE_SUBSCRIPTION_ID; do
+            if [[ -z "${!value:-}" ]]; then echo "Missing GitHub environment variable: $value" >&2; exit 1; fi
+          done
+          [[ "$AZURE_RESOURCE_GROUP" == "rg-koivu-store-demo" ]] || { echo "AZURE_RESOURCE_GROUP must be rg-koivu-store-demo" >&2; exit 1; }
+          [[ "$AZURE_RESOURCE_SUFFIX" =~ ^[a-z0-9]{6,10}$ ]] || { echo "AZURE_RESOURCE_SUFFIX must be 6-10 lowercase letters or digits" >&2; exit 1; }
+        env:
+          AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+          AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Validate application settings and secrets
+        if: inputs.stage == 'application'
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ -n "${RAG_INDEX_BLOB_NAME:-}" ]] || { echo "Missing RAG_INDEX_BLOB_NAME" >&2; exit 1; }
+          [[ -n "${OPENAI_API_KEY:-}" ]] || { echo "Missing OPENAI_API_KEY GitHub secret" >&2; exit 1; }
+          [[ -n "${SUPPORT_AGENT_API_KEY:-}" ]] || { echo "Missing SUPPORT_AGENT_API_KEY GitHub secret" >&2; exit 1; }
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          SUPPORT_AGENT_API_KEY: ${{ secrets.SUPPORT_AGENT_API_KEY }}
+
+      - name: Azure login with GitHub OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Select subscription
+        run: az account set --subscription "$AZURE_SUBSCRIPTION_ID"
+        env:
+          AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Provision Azure foundation with Bicep
+        if: inputs.stage == 'foundation'
+        shell: bash
+        run: |
+          set -euo pipefail
+          az bicep build --file infra/main.bicep
+          az deployment group create \
+            --resource-group "$AZURE_RESOURCE_GROUP" \
+            --template-file infra/main.bicep \
+            --parameters location="$AZURE_LOCATION" suffix="$AZURE_RESOURCE_SUFFIX"
+
+      - name: Build and push the application image
+        if: inputs.stage == 'application'
+        shell: bash
+        run: |
+          set -euo pipefail
+          ACR_NAME="koivu${AZURE_RESOURCE_SUFFIX}"
+          LOGIN_SERVER="${ACR_NAME}.azurecr.io"
+          IMAGE="${LOGIN_SERVER}/koivu-store:${GITHUB_SHA}"
+          ACR_TOKEN="$(az acr login --name "$ACR_NAME" --expose-token --query accessToken --output tsv)"
+          printf '%s' "$ACR_TOKEN" | docker login "$LOGIN_SERVER" --username 00000000-0000-0000-0000-000000000000 --password-stdin
+          docker buildx create --use
+          docker buildx build --file Dockerfile --tag "$IMAGE" --push .
+          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+
+      - name: Configure server-side secrets and deploy Container App
+        if: inputs.stage == 'application'
+        shell: bash
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+          SUPPORT_AGENT_API_KEY: ${{ secrets.SUPPORT_AGENT_API_KEY }}
+        run: |
+          set -euo pipefail
+          APP_NAME="koivu-${AZURE_RESOURCE_SUFFIX}"
+          COSMOS_NAME="koivu-cosmos-${AZURE_RESOURCE_SUFFIX}"
+          STORAGE_NAME="koivu${AZURE_RESOURCE_SUFFIX}"
+          IDENTITY_NAME="id-koivu-${AZURE_RESOURCE_SUFFIX}"
+          COSMOS_ENDPOINT="$(az cosmosdb show --resource-group "$AZURE_RESOURCE_GROUP" --name "$COSMOS_NAME" --query documentEndpoint --output tsv)"
+          STORAGE_ENDPOINT="$(az storage account show --resource-group "$AZURE_RESOURCE_GROUP" --name "$STORAGE_NAME" --query primaryEndpoints.blob --output tsv)"
+          IDENTITY_CLIENT_ID="$(az identity show --resource-group "$AZURE_RESOURCE_GROUP" --name "$IDENTITY_NAME" --query clientId --output tsv)"
+          RAG_URL="${STORAGE_ENDPOINT}koivu-rag/${RAG_INDEX_BLOB_NAME}"
+          az containerapp secret set --resource-group "$AZURE_RESOURCE_GROUP" --name "$APP_NAME" \
+            --secrets "openai-api-key=${OPENAI_API_KEY}" "support-key=${SUPPORT_AGENT_API_KEY}"
+          SECRET_ENV=(OPENAI_API_KEY=secretref:openai-api-key SUPPORT_AGENT_API_KEY=secretref:support-key)
+          if [[ -n "${TAVILY_API_KEY:-}" ]]; then
+            az containerapp secret set --resource-group "$AZURE_RESOURCE_GROUP" --name "$APP_NAME" --secrets "tavily-api-key=${TAVILY_API_KEY}"
+            SECRET_ENV+=(TAVILY_API_KEY=secretref:tavily-api-key)
+          else
+            az containerapp update --resource-group "$AZURE_RESOURCE_GROUP" --name "$APP_NAME" --remove-env-vars TAVILY_API_KEY
+            if az containerapp secret list --resource-group "$AZURE_RESOURCE_GROUP" --name "$APP_NAME" --query "[?name=='tavily-api-key'].name" --output tsv | grep -q .; then
+              az containerapp secret remove --resource-group "$AZURE_RESOURCE_GROUP" --name "$APP_NAME" --secret-names tavily-api-key
+            fi
+          fi
+          az containerapp update --resource-group "$AZURE_RESOURCE_GROUP" --name "$APP_NAME" --image "$IMAGE" \
+            --set-env-vars APP_ENVIRONMENT=production DATABASE_BACKEND=cosmos \
+              "COSMOS_ENDPOINT=$COSMOS_ENDPOINT" COSMOS_DATABASE_NAME=koivu \
+              COOKIE_SECURE=true CORS_ALLOWED_ORIGINS= \
+              CHROMA_PERSIST_DIR=/tmp/koivu/chroma_db "RAG_INDEX_BLOB_URL=$RAG_URL" \
+              "AZURE_CLIENT_ID=$IDENTITY_CLIENT_ID" PROVIDER_TIMEOUT_SECONDS=30 \
+              "${SECRET_ENV[@]}"
+          az containerapp ingress update --resource-group "$AZURE_RESOURCE_GROUP" --name "$APP_NAME" --type external --target-port 8000 --transport auto
+          URL="$(az containerapp show --resource-group "$AZURE_RESOURCE_GROUP" --name "$APP_NAME" --query properties.configuration.ingress.fqdn --output tsv)"
+          echo "Application URL: https://${URL}"
+          for attempt in $(seq 1 24); do
+            if curl --silent --show-error --fail "https://${URL}/health"; then break; fi
+            if [[ "$attempt" == "24" ]]; then echo "Container App health check did not succeed" >&2; exit 1; fi
+            sleep 10
+          done
+          curl --fail --show-error --silent "https://${URL}/ready"

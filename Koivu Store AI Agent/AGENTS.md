@@ -36,6 +36,16 @@ OpenAI embedding and chat calls can incur cost. Do not run live chat or vector/h
 
 Do not clear, replace, or migrate backend/chroma_db casually. It may contain persistent product vectors. The setup route requires a server-side catalog key because it can call the paid embeddings API. Keep support and setup credentials out of frontend code.
 
+## Azure deployment and costs
+
+- Local development remains SQLite + local Chroma by default. The prepared production target is a single-origin Azure Container App (static frontend plus FastAPI), Cosmos DB serverless for mutable user/order/support data, and a private Blob ZIP snapshot for the immutable Chroma index.
+- Do not add or use Azure Files as a network-mounted SQLite database. Do not silently change same-origin HttpOnly/SameSite session cookies or place API keys in the public frontend config.
+- `infra/main.bicep` is the only infrastructure-as-code source. The repository-root `../.github/workflows/azure-deploy.yml` is workflow-dispatch only, confirmation-gated, and must remain separate from normal CI. Never run Azure resource creation, activate a paid subscription, or deploy without explicit user approval.
+- Cosmos RU/storage, ACR Basic, Blob, Log Analytics ingestion, active Container Apps usage and OpenAI/Tavily use can incur charges. Budget alerts notify but do not stop billing. Explain cost/region assumptions and cleanup steps whenever the cloud design changes.
+- The production app must use its managed identity for ACR pull, Blob read and Cosmos data-plane access. Provider/support keys belong in the GitHub environment and Container Apps secrets; never in Bicep parameters/outputs, CI logs, source files, frontend JavaScript, screenshots, or chat.
+- Keep the human-facing Azure sequence in `docs/azure/MINUN_TEHTAVAT.md`, technical steps in `docs/azure/DEPLOYMENT.md`, and architecture/cost tradeoffs in `docs/azure/ARCHITECTURE.md`. Update these when settings, resource names, roles or workflow gates change.
+- Do not report Bicep, Docker, OIDC, provider, browser, or Azure deployment as verified unless it was actually run. Local environment validation does not prove cloud behavior.
+
 ## Interfaces to preserve
 
 - POST /chat accepts a message and up to 12 user/assistant history turns.
@@ -52,12 +62,15 @@ Run from backend:
 ```powershell
 .\.venv\Scripts\python.exe -m unittest discover -s tests -p "test_*.py" -v
 .\.venv\Scripts\python.exe -m compileall -q main.py agent core tests evals
+.\.venv\Scripts\python.exe -m compileall -q scripts
 ```
 
 Run from the repository root:
 
 ```powershell
 node --check frontend/store.js
+node --check frontend/support-console.js
+node --check frontend/app-config.js
 ```
 
 These checks do not call OpenAI or Tavily. The optional retrieval evaluation runner compares vector, BM25, and hybrid retrieval; vector and hybrid modes use the configured embedding provider.
