@@ -1,12 +1,12 @@
 # Azure architecture and readiness
 
-**Audit date:** 2026-10-13. This document describes a proposed deployment that is prepared in code. No Azure resources have been created, and no provider call or cloud deployment has been verified.
+**Audit date:** 2026-10-13. This document describes the deployment path implemented in source. Resource provisioning and runtime readiness are specific to the target Azure subscription; use the latest workflow run and `/ready` response to verify a deployment.
 
 ## Audit summary
 
 The repository contains a static HTML/CSS/JavaScript storefront and a FastAPI application (`backend/main.py`). The backend orchestrates a LangGraph assistant, OpenAI chat and embedding models, Chroma vector retrieval combined with in-memory BM25 using Reciprocal Rank Fusion, optional Tavily search, and owner-scoped account, order, and support workflows. Local account/order/support data is SQLite in `backend/koivu.sqlite3`; Chroma persists under `backend/chroma_db`; the product and policy corpus is versioned at `backend/data/products.txt`. The frontend originally sent API calls to fixed localhost URLs. It uses HttpOnly, SameSite=Strict session cookies and `credentials: include`.
 
-There is no existing Dockerfile, Azure infrastructure, container deployment, durable cloud database, cloud RAG snapshot, or deployment workflow. There is no operator audit table or seeded customer account; customers register through the demo. The catalog setup route can call the paid OpenAI embeddings API. Local Chroma and SQLite folders are ignored by Git and are not part of a deployment image.
+The source includes a Docker image, Bicep foundation, manually dispatched deployment workflow, Cosmos DB adapter, and private Blob snapshot restore path. These artifacts do not provision resources on push. There is no operator audit table or seeded customer account; customers register through the demo. The catalog setup route can call the paid OpenAI embeddings API. Local Chroma and SQLite folders are ignored by Git and are not part of a deployment image.
 
 The application remains a portfolio demo: checkout stores synthetic unpaid orders; it does not connect to a commerce, inventory, payment, or real support system.
 
@@ -104,11 +104,11 @@ The repository-root `.github/workflows/newslens-ci.yml` is NewsLens CI. Koivu's 
 
 ## Known limitations / approval boundary
 
-1. Cosmos serverless is the selected prepared option, but it is paid by RU and storage. Decide that its variable billing is acceptable and choose a monthly budget before provisioning. The source tree includes no Azure resources currently.
+1. Cosmos serverless is the selected option, but it is paid by RU and storage. Decide that its variable billing is acceptable and choose a monthly budget before provisioning. Bicep describes the resources; only a manual `foundation` dispatch provisions them.
 2. The ACR Basic registry adds a nonzero recurring baseline while it exists. For an occasional portfolio deployment, deleting the resource group after the demo is the strongest cost stop.
 3. Current app code is not a production commerce service: there is no email verification, password reset, per-operator authentication/audit, rate limiter, real payments, inventory, staff workflow, or data-retention job.
-4. Container Apps starts from zero and the first request waits for Python, Cosmos, Blob, and Chroma startup. The production readiness endpoint is checked after dispatch, but the deployment has not run here.
+4. Container Apps starts from zero and the first request waits for Python, Cosmos, Blob, and Chroma startup. Each application dispatch checks liveness and readiness; review those results for the selected revision.
 5. Chroma must be built locally and uploaded separately. Azure does not automatically create embeddings. A missing/invalid blob or wrong storage role keeps the app unready.
-6. The current workstation has neither Docker nor Azure CLI available, and sandbox DNS prevented installing the pinned Azure SDK packages. Local Docker build, Bicep compilation, Cosmos adapter integration test, OIDC, and Azure deployment remain unverified. The gated workflow runs Bicep compilation and tests when a human dispatches it.
+6. Deterministic tests and syntax checks do not prove live Cosmos, Blob, provider, or browser behavior. The gated workflow compiles Bicep during the foundation stage and checks application health/readiness during the application stage.
 
-See [deployment operations](DEPLOYMENT.md), [Finnish human setup guide](MINUN_TEHTAVAT.md), and [deployment checklist](CHECKLIST.md).
+See [deployment operations](DEPLOYMENT.md) and the [deployment checklist](CHECKLIST.md).

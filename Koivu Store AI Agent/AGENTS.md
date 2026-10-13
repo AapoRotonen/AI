@@ -43,7 +43,7 @@ Do not clear, replace, or migrate backend/chroma_db casually. It may contain per
 - `infra/main.bicep` is the only infrastructure-as-code source. The repository-root `../.github/workflows/azure-deploy.yml` is workflow-dispatch only, confirmation-gated, and must remain separate from normal CI. Never run Azure resource creation, activate a paid subscription, or deploy without explicit user approval.
 - Cosmos RU/storage, ACR Basic, Blob, Log Analytics ingestion, active Container Apps usage and OpenAI/Tavily use can incur charges. Budget alerts notify but do not stop billing. Explain cost/region assumptions and cleanup steps whenever the cloud design changes.
 - The production app must use its managed identity for ACR pull, Blob read and Cosmos data-plane access. Provider/support keys belong in the GitHub environment and Container Apps secrets; never in Bicep parameters/outputs, CI logs, source files, frontend JavaScript, screenshots, or chat.
-- Keep the human-facing Azure sequence in `docs/azure/MINUN_TEHTAVAT.md`, technical steps in `docs/azure/DEPLOYMENT.md`, and architecture/cost tradeoffs in `docs/azure/ARCHITECTURE.md`. Update these when settings, resource names, roles or workflow gates change.
+- Keep user-specific Azure portal walkthroughs out of Git. Maintain public technical steps in `docs/azure/DEPLOYMENT.md` and architecture/cost tradeoffs in `docs/azure/ARCHITECTURE.md`; update them when settings, resource names, roles or workflow gates change.
 - Do not report Bicep, Docker, OIDC, provider, browser, or Azure deployment as verified unless it was actually run. Local environment validation does not prove cloud behavior.
 
 ## Interfaces to preserve

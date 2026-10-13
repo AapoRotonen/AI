@@ -31,6 +31,8 @@ class HybridRetriever:
         self.embeddings = OpenAIEmbeddings(
             api_key=settings.openai_api_key,
             model=settings.embedding_model,
+            request_timeout=settings.provider_timeout_seconds,
+            max_retries=1,
         )
         self.chroma_client = chromadb.PersistentClient(
             path=settings.chroma_persist_dir,

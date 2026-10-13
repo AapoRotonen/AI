@@ -14,9 +14,14 @@ def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+class UserAlreadyExistsError(Exception):
+    """Raised by every database backend when the normalized email is in use."""
+
+
 class Database:
     def __init__(self, path: str | Path):
         self.path = Path(path)
+        self.initialized = False
 
     @contextmanager
     def connection(self) -> Iterator[sqlite3.Connection]:
@@ -83,13 +88,17 @@ class Database:
             case_columns = {row["name"] for row in db.execute("PRAGMA table_info(support_cases)").fetchall()}
             if "demo_response" not in case_columns:
                 db.execute("ALTER TABLE support_cases ADD COLUMN demo_response INTEGER NOT NULL DEFAULT 0")
+        self.initialized = True
 
     def create_user(self, user_id: str, email: str, password_hash: str) -> None:
-        with self.connection() as db:
-            db.execute(
-                "INSERT INTO users(id, email, password_hash, created_at) VALUES (?, ?, ?, ?)",
-                (user_id, email, password_hash, utc_now()),
-            )
+        try:
+            with self.connection() as db:
+                db.execute(
+                    "INSERT INTO users(id, email, password_hash, created_at) VALUES (?, ?, ?, ?)",
+                    (user_id, email, password_hash, utc_now()),
+                )
+        except sqlite3.IntegrityError as exc:
+            raise UserAlreadyExistsError(email) from exc
 
     def get_user_by_email(self, email: str) -> dict | None:
         with self.connection() as db:
@@ -302,3 +311,16 @@ class Database:
         result["safe_context"] = json.loads(result["safe_context"])
         result["demo_response"] = bool(result.get("demo_response", 0))
         return result
+
+
+def create_database(settings):
+    """Build the configured backend without changing the local SQLite default."""
+    if settings.database_backend == "cosmos":
+        from core.cosmos_database import CosmosDatabase
+
+        return CosmosDatabase(
+            endpoint=settings.cosmos_endpoint,
+            database_name=settings.cosmos_database_name,
+            managed_identity_client_id=settings.azure_client_id,
+        )
+    return Database(settings.database_path)

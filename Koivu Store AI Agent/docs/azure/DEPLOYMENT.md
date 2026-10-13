@@ -1,6 +1,6 @@
 # Azure deployment and operations
 
-This guide describes the prepared release path. It does not mean Azure was deployed: no cloud resources were created or tested. For the chronological portal setup, subscription, OIDC, secrets, and user approvals, follow [MINUN_TEHTAVAT.md](MINUN_TEHTAVAT.md) first.
+This guide describes the manual release path. It does not assume that a particular Azure subscription has been provisioned; check its resource group and the latest workflow run before acting. Keep user-specific portal notes and account details outside the public repository.
 
 ## 1. Prerequisites
 
@@ -71,7 +71,7 @@ The developer's Entra user needs `Storage Blob Data Contributor` for upload. The
 
 ## 4. Provision the foundation
 
-No resource group is created by Bicep. After choosing an active subscription, create a dedicated group and set the GitHub environment variables documented in [MINUN_TEHTAVAT.md](MINUN_TEHTAVAT.md). The Bicep uses one lowercase alphanumeric suffix for globally unique names and accepts a region parameter.
+No resource group is created by Bicep. After choosing an active subscription, create a dedicated group and configure the variables and secrets listed in the workflow and this document. The Bicep uses one lowercase alphanumeric suffix for globally unique names and accepts a region parameter.
 
 The first workflow run is manual:
 
@@ -97,7 +97,7 @@ The Container App's user-assigned identity must have:
 - `Storage Blob Data Reader` at the storage account scope.
 - Cosmos DB native `Cosmos DB Built-in Data Contributor` on the Cosmos account, data scope `/`.
 
-The human developer's Azure identity needs `Storage Blob Data Contributor` at the storage account scope for the one-time archive upload. Do not grant the GitHub deploy identity Cosmos data access. Exact commands and verification checks appear in the Finnish guide.
+The human developer's Azure identity needs `Storage Blob Data Contributor` at the storage account scope for the one-time archive upload. Do not grant the GitHub deploy identity Cosmos data access. Verify the scoped role assignments in Azure before deploying the application.
 
 Cosmos data-plane role assignment uses `az cosmosdb sql role assignment create`; ordinary ARM `Contributor` is not equivalent. The Bicep template intentionally does not grant roles. This keeps the workflow deploy identity from requiring broad RBAC administration rights; the developer assigns the narrow roles once.
 

@@ -22,6 +22,9 @@ backend/chroma_db
 **/chroma_db
 backend/koivu.sqlite3
 backend/koivu.sqlite3-*
+.rag-snapshots/
+backend/rag-snapshots/
+/docs/azure/MINUN_TEHTAVAT.md
 .cache/
 .logs/
 *.log

@@ -1,4 +1,4 @@
-const supportParams=new URLSearchParams(location.search);const requestedPort=Number(supportParams.get('apiPort'));const supportApiPort=Number.isInteger(requestedPort)&&requestedPort>=1024&&requestedPort<=65535?requestedPort:8000;const SUPPORT_API='http://'+(location.hostname==='localhost'?'localhost':'127.0.0.1')+':'+supportApiPort;
+const supportParams=new URLSearchParams(location.search);const requestedPort=Number(supportParams.get('apiPort'));const supportApiPort=Number.isInteger(requestedPort)&&requestedPort>=1024&&requestedPort<=65535?requestedPort:8000;const configuredSupportApi=window.KOIVU_CONFIG&&typeof window.KOIVU_CONFIG.apiBaseUrl==='string'?window.KOIVU_CONFIG.apiBaseUrl.trim().replace(/\/$/,''):'';const localSupportPreview=['localhost','127.0.0.1'].includes(location.hostname)&&location.port!=='8000'&&!configuredSupportApi;const SUPPORT_API=configuredSupportApi||(localSupportPreview?location.protocol+'//'+location.hostname+':'+supportApiPort:'');
 let supportKey='';
 const q=function(selector){return document.querySelector(selector);};
 function setSupportStatus(target,message,kind){target.textContent=message;target.dataset.kind=kind||'';}
@@ -9,7 +9,7 @@ async function loadSupportCases(){
  let url=SUPPORT_API+'/support/cases';if(filter!=='all')url+='?status='+encodeURIComponent(filter);
  try{
   const response=await fetch(url,{headers:supportHeaders(false),cache:'no-store'});const data=await response.json().catch(function(){return{};});
-  if(!response.ok){if(response.status===503)throw new Error('Käsittelijän rajapinta ei ole määritetty. Tarkista backend/.env ja SUPPORT_AGENT_API_KEY.');throw new Error(data.detail||'Tukipyyntöjä ei voitu hakea.');}
+  if(!response.ok){if(response.status===503)throw new Error('Käsittelijän avainta ei ole määritetty palvelimella.');throw new Error(data.detail||'Tukipyyntöjä ei voitu hakea.');}
   q('#support-workspace').hidden=false;q('#support-login-panel').hidden=true;
   q('#support-count').textContent=data.length+' pyyntöä / tila: '+({open:'avoinna',answered:'vastattu',closed:'suljettu',all:'kaikki'}[filter]||filter);
   if(!data.length){const empty=document.createElement('p');empty.className='support-empty';empty.textContent='Tässä näkymässä ei ole tukipyyntöjä.';list.appendChild(empty);}

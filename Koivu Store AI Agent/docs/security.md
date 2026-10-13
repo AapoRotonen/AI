@@ -1,6 +1,6 @@
 # Security model
 
-This is a local portfolio demo. Its security controls demonstrate boundaries in application code; they do not make the service ready for public deployment.
+This is a portfolio demo. Local mode uses SQLite/Chroma. The Azure deployment path uses Cosmos DB, private Blob storage, managed identity, and a manually dispatched workflow; verify the current resource and readiness state in the target Azure subscription. These controls do not make the service a production commerce service.
 
 ## Threat model
 
@@ -9,7 +9,7 @@ Assume a caller can send arbitrary chat text, forge browser conversation history
 ## Implemented controls
 
 - **Authentication:** email/password registration; minimum 12-character password; salted PBKDF2-HMAC-SHA256 password hashes; generic login failures. Successful login creates a random, revocable server-side session. Only a digest of the cookie token is stored.
-- **Cookie and browser boundary:** session cookie is `HttpOnly`, `SameSite=Strict`, and `Secure` is configurable for HTTPS deployments. CORS permits only configured exact origins and credentialed requests.
+- **Cookie and browser boundary:** session cookie is `HttpOnly`, `SameSite=Strict`, and `Secure` is explicit in production configuration. The prepared Azure app serves frontend and API from the same HTTPS origin; production CORS is empty by default. Uvicorn does not trust forwarded headers.
 - **Authorization:** order listing, support-case status, and ticket creation require a valid session. Repository methods scope order queries by both the requested ID and authenticated owner ID. Missing and foreign orders produce the same result. Customers can read only their own cases.
 - **Least-privilege tool:** `get_order_status` accepts only a validated order reference. The API binds the authenticated user ID to the tool before graph execution. The tool cannot list orders, execute SQL, or mutate order state.
 - **Support operations:** case review/reply/close endpoints require `X-Support-Agent-Key`; when no key is configured, they return `503`. The catalog setup endpoint similarly requires `X-Catalog-Setup-Key` because initialization may incur embedding costs.
@@ -32,7 +32,8 @@ Assume a caller can send arbitrary chat text, forge browser conversation history
 
 - There is no rate limit, account lockout, email verification, password reset, MFA, CSRF token, or abuse/cost quota. SameSite cookies and exact CORS origins reduce browser cross-site exposure but are not a substitute for a full deployment review.
 - `SUPPORT_AGENT_API_KEY` is a shared operator credential, so the demo cannot attribute actions to individual staff members. It must be random, server-side, and rotated if exposed.
-- SQLite is local single-service persistence without encryption-at-rest, managed backups, retention automation, or multi-instance coordination.
-- API keys must not be exposed to the browser. Set `COOKIE_SECURE=true` behind HTTPS, use a secrets manager, configure exact frontend origins, rate-limit costly endpoints, and review provider agreements before real customer data is used.
+- Local SQLite is single-service persistence without application-managed backups or retention automation. The Azure backend uses Cosmos DB serverless with the app's managed identity and Cosmos data-plane RBAC; the cloud account is single-region and paid by RU/storage. Resource provisioning and integration status depend on the target Azure subscription and the latest deployment run.
+- Azure provider/support API keys are placed into Container Apps secrets by a manually dispatched GitHub workflow from protected environment secrets. Never expose them to the browser. The support key is still shared and has no operator-level identity/audit.
+- There is no application rate limiter, account lockout, password reset, email verification, MFA, staff identity, or real order system. Review provider agreements and decide data retention before real personal data is used.
 - Source-ID validation proves only that an answer cited a retrieved source. It does not prove every semantic claim is entailed by that source. Model-backed factual quality still needs human-reviewed evaluations.
 - The demo order store is not connected to payment, fulfillment, or a real commerce system.

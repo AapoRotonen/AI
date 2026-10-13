@@ -76,6 +76,14 @@ Passwords and session tokens are not stored in plaintext. Application event logs
 
 The system preserves hybrid retrieval, exposes three retrieval methods to the evaluation runner, adds stable product identifiers for new ingestion, requires typed evidence assessment, and validates generated citations against the retrieved set. The classifier still uses a hosted LLM and semantic source entailment is not mechanically proven.
 
+## Azure deployment readiness (prepared, not verified)
+
+- Changed the app to serve static storefront pages from FastAPI, use same-origin frontend configuration in cloud, add lightweight `/health` and database/catalog `/ready`, validate production settings, set provider request timeouts, and disable catalog setup in production.
+- Added an optional Cosmos DB repository with owner-keyed partitioning, session expiry TTL, private Blob Chroma snapshot download/hash validation, and a local snapshot-packaging script. Local SQLite/Chroma remain the defaults.
+- Added a non-root Docker image, exact top-level Python pins, a resource-group Bicep foundation, and a manual confirmation-gated GitHub OIDC deployment workflow.
+- Added public Azure architecture, operations, and deployment-checklist documentation, plus updated README/AGENTS/security/privacy documentation. User-specific portal notes are excluded from Git.
+- Cosmos serverless and ACR Basic can incur charges. Azure provisioning and runtime status are subscription-specific; verify the latest workflow result, public URL, `/health`, and nonzero `/ready` catalogue count before sharing a deployment. Deterministic local tests do not prove live Cosmos/Blob access or provider behavior.
+
 ## Testing and verification status
 
 ### Verified locally on 2026-09-30

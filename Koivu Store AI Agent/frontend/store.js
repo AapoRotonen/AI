@@ -1,7 +1,9 @@
 const localApiPort = new URLSearchParams(location.search).get('apiPort');
 const parsedApiPort = Number(localApiPort);
 const API_PORT = Number.isInteger(parsedApiPort) && parsedApiPort >= 1024 && parsedApiPort <= 65535 ? parsedApiPort : 8000;
-const API='http://'+(location.hostname==='localhost'?'localhost':'127.0.0.1')+':'+API_PORT;
+const configuredApiBase = window.KOIVU_CONFIG && typeof window.KOIVU_CONFIG.apiBaseUrl === 'string' ? window.KOIVU_CONFIG.apiBaseUrl.trim().replace(/\/$/, '') : '';
+const localPreview = ['localhost','127.0.0.1'].includes(location.hostname) && location.port !== '8000' && !configuredApiBase;
+const API = configuredApiBase || (localPreview ? location.protocol+'//'+location.hostname+':'+API_PORT : '');
 const products=[
  {id:'merino',name:'Merinovillapaita Klassik',material:'100 % merinovilla · 180 g/m²',price:89,category:'neuleet',badge:'ARKISUOSIKKI',image:'https://images.unsplash.com/photo-1577393439344-b89b65dfd169?auto=format&fit=crop&w=760&q=82',alt:'Neulottu merinovillapaita luonnonläheisessä värissä',description:'Ajaton merinovillapaita sopii arkeen ja juhlaan. Lämmin mutta hengittävä, ei kutita. Konepesu 30 asteessa.',sizes:['XS','S','M','L','XL','XXL'],colors:[{name:'Forest',hex:'#385b49',stock:['XS','S','M','L','XL','XXL']},{name:'Navy',hex:'#344255',stock:['XS','S','M','L','XL','XXL']},{name:'Charcoal',hex:'#55534f',stock:['XS','S','M','L','XL','XXL']},{name:'Ivory',hex:'#eae4d7',stock:['XS','S','M','L','XL','XXL']}]},
  {id:'pellava',name:'Pellavahousut Rento',material:'100 % pellava',price:120,category:'vaatteet',badge:'LUONNONMATERIAALI',image:'https://images.unsplash.com/photo-1715233749622-3216fe49e682?auto=format&fit=crop&w=760&q=82',alt:'Rennosti laskeutuvat pellavahousut',description:'Väljät, hengittävät pellavahousut lämpimiin päiviin. Konepesu 40 asteessa. Beige ja White saatavilla kaikissa koissa.',sizes:['XS','S','M','L','XL'],colors:[{name:'Beige',hex:'#c9b99b',stock:['XS','S','M','L','XL']},{name:'White',hex:'#f0eee7',stock:['XS','S','M','L','XL']},{name:'Sage',hex:'#96a390',stock:['XS','S','M']},{name:'Camel',hex:'#bca27b',stock:[]}]},

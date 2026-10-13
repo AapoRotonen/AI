@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import hmac
 import re
-import sqlite3
 import time
 import uuid
 from contextlib import asynccontextmanager
@@ -14,12 +13,13 @@ from typing import Literal
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field
 
 from agent.graph import get_agent
 from agent.state import AgentState
 from core.config import Settings, get_settings
-from core.database import Database
+from core.database import Database, UserAlreadyExistsError, create_database
 from core.observability import log_event
 from core.orders import OrderStatusService, price_demo_order_items
 from core.security import (
@@ -179,9 +179,26 @@ def create_app(database: Database | None = None, config: Settings | None = None)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
-        app.state.database = database or Database(active_settings.database_path)
-        app.state.database.initialize()
-        yield
+        app.state.database = database or create_database(active_settings)
+        app.state.database_ready = False
+        owns_database = database is None
+        try:
+            app.state.database.initialize()
+            if active_settings.app_environment == "production":
+                from core.rag_snapshot import restore_rag_snapshot
+
+                restore_rag_snapshot(
+                    active_settings.rag_index_blob_url,
+                    active_settings.chroma_persist_dir,
+                    active_settings.azure_client_id,
+                )
+                if get_retriever().get_count() <= 0:
+                    raise RuntimeError("The configured RAG snapshot contains no catalogue documents")
+            app.state.database_ready = True
+            yield
+        finally:
+            if owns_database and callable(getattr(app.state.database, "close", None)):
+                app.state.database.close()
 
     app = FastAPI(title="Koivu Store AI API", version="2.0.0", lifespan=lifespan)
     origins = [origin.strip() for origin in active_settings.cors_allowed_origins.split(",") if origin.strip()]
@@ -204,6 +221,11 @@ def create_app(database: Database | None = None, config: Settings | None = None)
             response = await call_next(request)
             status_code = response.status_code
             response.headers["X-Request-ID"] = request_id
+            response.headers["X-Content-Type-Options"] = "nosniff"
+            response.headers["X-Frame-Options"] = "DENY"
+            response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+            if active_settings.cookie_secure:
+                response.headers["Strict-Transport-Security"] = "max-age=31536000"
             if request.url.path.startswith(("/auth/", "/orders", "/support/", "/chat", "/human-chat")):
                 response.headers["Cache-Control"] = "no-store"
             return response
@@ -250,6 +272,8 @@ def create_app(database: Database | None = None, config: Settings | None = None)
     def require_catalog_admin(
         setup_key: str | None = Header(default=None, alias="X-Catalog-Setup-Key"),
     ) -> None:
+        if active_settings.app_environment == "production":
+            raise HTTPException(status_code=404, detail="Katalogi alustetaan julkaistavasta RAG-indeksistä.")
         expected = active_settings.catalog_setup_api_key
         if not expected:
             raise HTTPException(status_code=503, detail="Katalogin alustusta ei ole määritetty.")
@@ -258,7 +282,19 @@ def create_app(database: Database | None = None, config: Settings | None = None)
 
     @app.get("/health")
     def health():
-        return {"status": "ok", "products_loaded": get_retriever().get_count()}
+        return {"status": "ok"}
+
+    @app.get("/ready")
+    def readiness(request: Request):
+        if not getattr(request.app.state, "database_ready", False):
+            raise HTTPException(status_code=503, detail="Tietokanta ei ole valmis.")
+        try:
+            product_count = get_retriever().get_count()
+        except Exception as exc:
+            raise HTTPException(status_code=503, detail="Tuotekatalogi ei ole valmis.") from exc
+        if active_settings.app_environment == "production" and product_count <= 0:
+            raise HTTPException(status_code=503, detail="Tuotekatalogi ei ole valmis.")
+        return {"status": "ready", "products_loaded": product_count}
 
     @app.post("/setup")
     def setup_knowledge_base(_: None = Depends(require_catalog_admin)):
@@ -286,7 +322,7 @@ def create_app(database: Database | None = None, config: Settings | None = None)
         user_id = new_user_id()
         try:
             db.create_user(user_id, email, hash_password(payload.password))
-        except sqlite3.IntegrityError:
+        except UserAlreadyExistsError:
             raise HTTPException(status_code=409, detail="Tälle sähköpostiosoitteelle on jo tili.")
         _issue_session(response, db, user_id, active_settings)
         log_event("auth_register", request_id=http_request.state.request_id, user_id=user_id)
@@ -482,6 +518,9 @@ def create_app(database: Database | None = None, config: Settings | None = None)
             support_case_id=case["id"],
         )
 
+    frontend_dir = Path(__file__).resolve().parent.parent / "frontend"
+    app.mount("/", StaticFiles(directory=str(frontend_dir), html=True), name="frontend")
+
     return app
 
 
@@ -489,6 +528,7 @@ app = create_app()
 
 
 if __name__ == "__main__":
+    import os
     import uvicorn
 
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=int(os.environ.get("PORT", "8000")))

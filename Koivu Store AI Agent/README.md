@@ -59,9 +59,25 @@ From the repository root, check frontend JavaScript syntax:
 
 ```powershell
 node --check frontend/store.js
+node --check frontend/support-console.js
+node --check frontend/app-config.js
 ```
 
+For a local container smoke test when Docker is installed, build from the repository root with `docker build -t koivu-store:local .` and run `docker run --rm -p 8000:8000 --env-file backend/.env koivu-store:local`.
+
 The retrieval evaluation dataset and Recall@K, Precision@K, and MRR runner are documented in [docs/rag-evaluation.md](docs/rag-evaluation.md). Running vector or hybrid evaluation uses the configured embeddings provider and may incur API costs; the normal tests mock model/tool calls and do not make those requests.
+
+## Azure deployment
+
+The repository includes a prepared Azure Container Apps deployment path. The app serves both the static storefront and FastAPI from one HTTPS origin so the existing HttpOnly/SameSite session cookie remains same-origin. Local development still defaults to SQLite and Chroma; the Azure target uses Cosmos DB serverless for durable demo accounts, sessions, orders and support cases, and a private Blob snapshot for Chroma.
+
+Azure resources are **not** created on push or pull request. The separate GitHub Actions workflow is manual, has a `no`-by-default confirmation gate, and splits foundation provisioning from application deployment. Check each run's health and readiness results before sharing the app. Cosmos requests/storage, ACR Basic, Blob, logs, active container usage, and provider APIs can cost money.
+
+- [Azure architecture and cost model](docs/azure/ARCHITECTURE.md)
+- [Technical deployment and operations](docs/azure/DEPLOYMENT.md)
+- [Azure deployment checklist](docs/azure/CHECKLIST.md)
+
+Do not dispatch the `foundation` stage until you accept the possible Cosmos DB/registry charges and configure a Cost Management budget. Alerts do not stop billing. Review the architecture and deployment documents before provisioning.
 
 ## Documentation
 
@@ -73,6 +89,9 @@ The retrieval evaluation dataset and Recall@K, Precision@K, and MRR runner are d
 - [Agent evaluation](docs/agent-evaluation.md)
 - [Current system summary (Finnish)](docs/current-system.md)
 - [Implementation summary and verification status](docs/implementation-summary.md)
+- [Azure architecture](docs/azure/ARCHITECTURE.md)
+- [Azure operations](docs/azure/DEPLOYMENT.md)
+- [Azure deployment checklist](docs/azure/CHECKLIST.md)
 - [Coding-agent instructions](AGENTS.md)
 
 This remains a portfolio/demo system, not a production commerce service. Before real customer use, add abuse controls and rate limits, staff identities and audit attribution, operational alerting, secure deployment configuration, formal retention rules, and a real order-service integration.

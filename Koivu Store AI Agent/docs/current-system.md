@@ -7,3 +7,7 @@ Asiakaskohtaiset tilaus- ja tukitiedot vaativat kirjautumisen. Tilin kautta voi 
 Kun asiakas pyytää ihmistä, kirjautuneelle käyttäjälle tallennetaan tukipyyntö ja paikallinen demokäsittelijä vastaa samaan chattiin selvästi merkittynä. Tukihenkilön suojatussa näkymässä voi lisäksi tarkastella, vastata ja sulkea pyyntöjä. Kirjautumattomalle käyttäjälle chat näyttää kirjautumispyynnön ja jatkotoiminto on käyttäjän valittavissa.
 
 Sovellus tallentaa paikalliseen SQLite-tietokantaan demoasiakkaat, istunnot, tilaukset ja tukipyynnöt. Ostoskori ja suosikit ovat selaimen tallennustilassa. Tämä ei ole maksupalvelu eikä tuotantokäyttöön valmis verkkokauppa.
+
+## Valmisteltu Azure-vaihtoehto
+
+Paikallinen oletus ei muutu: kehityksessä käytetään SQLiteä ja paikallista Chroma-indeksiä. Azure-julkaisupolku käyttää Container Appsia, Cosmos DB serverlessiä ja yksityistä Blob Storagea Chroma-arkistolle. Resurssien luonti ja sovelluksen julkaisu vaativat erilliset, manuaalisesti käynnistettävät workflow-vaiheet; Azure-tilin tila ja kustannukset ovat ympäristökohtaisia. Katso [Azure-julkaisun tekniset ohjeet](azure/DEPLOYMENT.md) ja [arkkitehtuuri](azure/ARCHITECTURE.md).
