@@ -22,6 +22,7 @@ from core.config import Settings, get_settings
 from core.database import Database, UserAlreadyExistsError, create_database
 from core.observability import log_event
 from core.orders import OrderStatusService, price_demo_order_items
+from core.runtime_paths import resolve_frontend_directory
 from core.security import (
     hash_password,
     new_case_id,
@@ -518,7 +519,7 @@ def create_app(database: Database | None = None, config: Settings | None = None)
             support_case_id=case["id"],
         )
 
-    frontend_dir = Path(__file__).resolve().parent.parent / "frontend"
+    frontend_dir = resolve_frontend_directory(__file__)
     app.mount("/", StaticFiles(directory=str(frontend_dir), html=True), name="frontend")
 
     return app
