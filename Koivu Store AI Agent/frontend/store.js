@@ -4,25 +4,19 @@ const API_PORT = Number.isInteger(parsedApiPort) && parsedApiPort >= 1024 && par
 const configuredApiBase = window.KOIVU_CONFIG && typeof window.KOIVU_CONFIG.apiBaseUrl === 'string' ? window.KOIVU_CONFIG.apiBaseUrl.trim().replace(/\/$/, '') : '';
 const localPreview = ['localhost','127.0.0.1'].includes(location.hostname) && location.port !== '8000' && !configuredApiBase;
 const API = configuredApiBase || (localPreview ? location.protocol+'//'+location.hostname+':'+API_PORT : '');
-const products=[
- {id:'merino',name:'Merinovillapaita Klassik',material:'100 % merinovilla · 180 g/m²',price:89,category:'neuleet',badge:'ARKISUOSIKKI',image:'https://images.unsplash.com/photo-1577393439344-b89b65dfd169?auto=format&fit=crop&w=760&q=82',alt:'Neulottu merinovillapaita luonnonläheisessä värissä',description:'Ajaton merinovillapaita sopii arkeen ja juhlaan. Lämmin mutta hengittävä, ei kutita. Konepesu 30 asteessa.',sizes:['XS','S','M','L','XL','XXL'],colors:[{name:'Forest',hex:'#385b49',stock:['XS','S','M','L','XL','XXL']},{name:'Navy',hex:'#344255',stock:['XS','S','M','L','XL','XXL']},{name:'Charcoal',hex:'#55534f',stock:['XS','S','M','L','XL','XXL']},{name:'Ivory',hex:'#eae4d7',stock:['XS','S','M','L','XL','XXL']}]},
- {id:'pellava',name:'Pellavahousut Rento',material:'100 % pellava',price:120,category:'vaatteet',badge:'LUONNONMATERIAALI',image:'https://images.unsplash.com/photo-1715233749622-3216fe49e682?auto=format&fit=crop&w=760&q=82',alt:'Rennosti laskeutuvat pellavahousut',description:'Väljät, hengittävät pellavahousut lämpimiin päiviin. Konepesu 40 asteessa. Beige ja White saatavilla kaikissa koissa.',sizes:['XS','S','M','L','XL'],colors:[{name:'Beige',hex:'#c9b99b',stock:['XS','S','M','L','XL']},{name:'White',hex:'#f0eee7',stock:['XS','S','M','L','XL']},{name:'Sage',hex:'#96a390',stock:['XS','S','M']},{name:'Camel',hex:'#bca27b',stock:[]}]},
- {id:'vyö',name:'Nahkavyö Slim',material:'Italialainen pehmeä nahka · messinkilukko',price:45,category:'asusteet',image:'https://images.unsplash.com/photo-1664286074176-5206ee5dc878?auto=format&fit=crop&w=760&q=82',alt:'Pehmeä nahkainen asuste luonnollisessa sävyssä',description:'Italialaisesta pehmeästä nahasta valmistettu kapea vyö. Ajaton messinkilukko sopii housujen ja hameen kanssa.',sizes:['75 cm','80 cm','85 cm','90 cm','95 cm','100 cm'],colors:[{name:'Cognac',hex:'#936542',stock:['75 cm','80 cm','85 cm','90 cm','95 cm','100 cm']},{name:'Black',hex:'#333430',stock:['75 cm','80 cm','85 cm','90 cm','95 cm','100 cm']},{name:'Tan',hex:'#c9a782',stock:['75 cm','90 cm','95 cm','100 cm']}]},
- {id:'kasmir',name:'Kasmirhuivi Luxe',material:'100 % mongolialainen kasmir · 200 × 70 cm',price:160,category:'neuleet',badge:'PEHMEÄ SUOSIKKI',image:'https://images.unsplash.com/photo-1550614412-40be4484c638?auto=format&fit=crop&w=760&q=82',alt:'Pehmeästi laskeutuva villahuivi',description:'Pehmeä ja lämmin kaksikerroksisesta mongolialaisesta kasmirista kudottu huivi. 200 × 70 cm. Käsinpesu kylmässä vedessä tai kuivapesu.',sizes:['Yksi koko'],colors:[{name:'Forest',hex:'#41584a',stock:['Yksi koko']},{name:'Camel',hex:'#b79b74',stock:['Yksi koko']},{name:'Dusty Rose',hex:'#c9a5a2',stock:['Yksi koko']},{name:'Midnight',hex:'#444e5f',stock:['Yksi koko']}]},
- {id:'denim',name:'Denim-takki Vintage',material:'100 % puuvilla · 12 oz denim',price:185,category:'vaatteet',image:'https://images.unsplash.com/photo-1559475464-ffe519cfb9f1?auto=format&fit=crop&w=760&q=82',alt:'Klassinen sininen denimtakki',description:'Vintagetyylinen denimtakki, jossa on neljä taskua ja metallinapit. Konepesu nurinpäin 30 asteessa, ilmakuivaus.',sizes:['XS','S','M','L','XL','XXL'],colors:[{name:'Washed Blue',hex:'#697b8d',stock:['XS','S','M','L','XL','XXL']},{name:'Dark Indigo',hex:'#354256',stock:['S','M','L']},{name:'Ecru',hex:'#ddd7c9',stock:[]}]},
- {id:'silkki',name:'Silkkipaita Elegance',material:'100 % mulberry-silkki · 19 momme',price:135,category:'vaatteet',badge:'HARKITTU VALINTA',image:'https://images.unsplash.com/photo-1565544758282-1582ed828211?auto=format&fit=crop&w=760&q=82',alt:'Tyylikäs luonnonvaalea silkkipaita',description:'Pehmeästi laskeutuvaa 19 mommen mulberry-silkkiä. Klassinen paita juhlaan tai arkeen.',sizes:['XS','S','M','L','XL'],colors:[{name:'Ivory',hex:'#eee8dc',stock:['XS','S','M','L','XL']},{name:'Blush',hex:'#ddbab8',stock:['XS','S','M']},{name:'Champagne',hex:'#c9b898',stock:[]},{name:'Black',hex:'#393934',stock:['XS','S','M','L','XL']}]}
-];
+let products=[];
 
 const qs=function(s,root){return(root||document).querySelector(s);};
 const esc=function(value){return String(value).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#39;");};
 const money=function(value){return value.toLocaleString('fi-FI',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';};
 const filter={category:'kaikki',query:'',favorite:false,sort:'recommended'};
-let favorites=new Set();let cart=[];let selectedProduct=null;let selectedColor='';let selectedSize='';let pendingCheckout=false,isOrdering=false;
+const categoryLabels={neuleet:'Neuleet',vaatteet:'Vaatteet',asusteet:'Asusteet',laukut:'Laukut',kengät:'Kengät'};
+let favorites=new Set();let cart=[];let selectedProduct=null;let selectedColor='';let selectedSize='';let pendingCheckout=false,pendingStripeCheckout=false,isOrdering=false,stripeCheckoutEnabled=false;
 try{favorites=new Set(JSON.parse(localStorage.getItem('koivu-favorites')||'[]'));}catch(e){}
 function restoreCart(entries){
  if(!Array.isArray(entries))return[];
  const restored=[];
- entries.slice(0,products.length*24).forEach(function(entry){
+ entries.slice(0,24).forEach(function(entry){
   if(!entry||typeof entry!=='object')return;
   const product=products.find(function(item){return item.id===entry.id;});
   if(!product)return;
@@ -37,10 +31,10 @@ function restoreCart(entries){
  });
  return restored;
 }
-try{cart=restoreCart(JSON.parse(localStorage.getItem('koivu-cart')||'[]'));}catch(e){cart=[];}
+function restoreSavedCart(){try{cart=restoreCart(JSON.parse(localStorage.getItem('koivu-cart')||'[]'));}catch(e){cart=[];}}
 const available=function(product,color){return product.colors.find(function(item){return item.name===color;})||{stock:[]};};
 const firstColor=function(product){return product.colors.find(function(item){return item.stock.length;})||product.colors[0];};
-const selectedCardColors=Object.fromEntries(products.map(function(product){return[product.id,firstColor(product).name];}));
+let selectedCardColors={};
 function toast(message){const el=qs('#toast');el.textContent=message;el.hidden=false;el.classList.add('visible');clearTimeout(window.koivuToast);window.koivuToast=setTimeout(function(){el.classList.remove('visible');setTimeout(function(){if(!el.classList.contains('visible'))el.hidden=true;},220);},2100);}
 function renderProducts(){
  let visible=products.filter(function(p){return(filter.category==='kaikki'||p.category===filter.category)&&((p.name+' '+p.material+' '+p.colors.map(function(c){return c.name;}).join(' ')).toLocaleLowerCase('fi').includes(filter.query.toLocaleLowerCase('fi')))&&(!filter.favorite||favorites.has(p.id));});
@@ -52,7 +46,7 @@ function renderProducts(){
    const c=available(p,selectedCardColors[p.id]||firstColor(p).name);
    return '<article class="card" style="animation-delay:'+index*.035+'s"><div class="product-photo"><img src="'+esc(p.image)+'" alt="'+esc(p.alt)+'" loading="lazy" decoding="async">'+(p.badge?'<span class="badge">'+esc(p.badge)+'</span>':'')+
    '<button class="heart" type="button" data-act="favorite" data-id="'+esc(p.id)+'" aria-pressed="'+favorites.has(p.id)+'" aria-label="'+(favorites.has(p.id)?'Poista suosikeista: ':'Lisää suosikkeihin: ')+esc(p.name)+'"><svg viewBox="0 0 24 24"><path d="M20.5 8.9c0 4-8.5 10.4-8.5 10.4S3.5 12.9 3.5 8.9a4.5 4.5 0 0 1 8.5-2.1 4.5 4.5 0 0 1 8.5 2.1Z"/></svg></button><button class="quick" type="button" data-act="open" data-id="'+esc(p.id)+'">Valitse koko &amp; väri　→</button></div>'+
-   '<div class="info"><p class="category">'+(p.category==='neuleet'?'Luonnonmateriaalit':p.category==='asusteet'?'Ajaton asuste':'Vaatteet jokapäiväiseen käyttöön')+'</p><div class="title-row"><button class="name" type="button" data-act="open" data-id="'+esc(p.id)+'">'+esc(p.name)+'</button><span class="price">'+p.price+' €</span></div><p class="material">'+esc(p.material)+'</p><div class="swatches" aria-label="Värivaihtoehdot">'+p.colors.map(function(col){return '<button class="swatch" type="button" style="background:'+esc(col.hex)+'" title="'+esc(col.name)+(col.stock.length?'':' · Loppuunmyyty')+'" aria-label="'+esc(col.name)+(col.stock.length?'':' · Loppuunmyyty')+'" aria-pressed="'+(col.name===c.name)+'" '+(!col.stock.length?'disabled':'')+' data-act="color" data-id="'+esc(p.id)+'" data-color="'+esc(col.name)+'"></button>';}).join('')+'</div></div></article>';
+   '<div class="info"><p class="category">'+esc(categoryLabels[p.category]||'Koivun mallisto')+'</p><div class="title-row"><a class="name" href="product.html?id='+encodeURIComponent(p.id)+(localApiPort?'&amp;apiPort='+encodeURIComponent(localApiPort):'')+'">'+esc(p.name)+'</a><span class="price">'+p.price+' €</span></div><p class="material">'+esc(p.material)+'</p><div class="swatches" aria-label="Värivaihtoehdot">'+p.colors.map(function(col){return '<button class="swatch" type="button" style="background:'+esc(col.hex)+'" title="'+esc(col.name)+(col.stock.length?'':' · Loppuunmyyty')+'" aria-label="'+esc(col.name)+(col.stock.length?'':' · Loppuunmyyty')+'" aria-pressed="'+(col.name===c.name)+'" '+(!col.stock.length?'disabled':'')+' data-act="color" data-id="'+esc(p.id)+'" data-color="'+esc(col.name)+'"></button>';}).join('')+'</div></div></article>';
  }).join(''):'<p class="empty"><strong>'+ (filter.favorite?'Ei vielä suosikkeja.':'Tuotteita ei löytynyt.')+'</strong>Lisää tuotteita suosikkeihin painamalla sydäntä, tai kokeile uutta hakusanaa.</p>';
 }
 function renderFavorites(){qs('#favorite-count').textContent=favorites.size;qs('#favorite-count').hidden=!favorites.size;qs('#favorites-toggle').setAttribute('aria-pressed',filter.favorite);}
@@ -67,12 +61,12 @@ function openProduct(id,color){
 }
 function renderDetail(){
  const p=selectedProduct;if(!p)return;const stock=available(p,selectedColor).stock;if(!stock.includes(selectedSize))selectedSize=stock[0]||'';
- qs('#product-detail').innerHTML='<div class="detail-photo"><img src="'+esc(p.image)+'" alt="'+esc(p.alt)+'"></div><div class="detail-copy"><p class="kicker">'+(p.category==='asusteet'?'Tarkoin valittu asuste':'Pehmeitä luonnonkuituja')+'</p><h2 id="detail-heading">'+esc(p.name)+'</h2><p class="detail-material">'+esc(p.material)+'</p><p class="detail-price">'+p.price+' €</p><p class="detail-description">'+esc(p.description)+'</p><span class="option-label">Väri — '+esc(selectedColor)+'</span><div class="detail-colors">'+p.colors.map(function(c){return'<button class="color-option" type="button" data-color-option="'+esc(c.name)+'" aria-pressed="'+(c.name===selectedColor)+'">'+esc(c.name)+(c.stock.length?'':' · loppuunmyyty')+'</button>';}).join('')+'</div><span class="option-label">'+(p.sizes.length===1?'Malli':'Valitse koko')+'</span><div class="sizes">'+p.sizes.map(function(s){return'<button class="size-option" type="button" data-size="'+esc(s)+'" aria-pressed="'+(s===selectedSize)+'" '+(stock.includes(s)?'':'disabled')+'>'+esc(s)+'</button>';}).join('')+'</div><p class="stock '+(stock.length?'':'sold-out')+'" aria-live="polite">'+(stock.length?(stock.length===p.sizes.length?'Saatavilla':stock.join(', ')+' saatavilla'):'Väri loppuunmyyty')+'</p><button class="primary" id="add-product" type="button" '+(selectedSize?'':'disabled')+'>Lisää ostoskoriin · '+p.price+' €</button>'+(p.sizes.length>1?'<br><a class="size-guide" href="#kokotaulukko" id="size-guide">Apua koon valintaan</a>':'')+'</div>';
+ qs('#product-detail').innerHTML='<div class="detail-photo"><img src="'+esc(p.image)+'" alt="'+esc(p.alt)+'"></div><div class="detail-copy"><p class="kicker">'+esc(categoryLabels[p.category]||'Koivun mallisto')+'</p><h2 id="detail-heading">'+esc(p.name)+'</h2><p class="detail-material">'+esc(p.material)+'</p><p class="detail-price">'+money(p.price)+'</p><p class="detail-description">'+esc(p.description)+'</p><p class="detail-material">Hoito: '+esc(p.care||'Katso vaatteen hoito-ohje.')+'</p><span class="option-label">Väri — '+esc(selectedColor)+'</span><div class="detail-colors">'+p.colors.map(function(c){return'<button class="color-option" type="button" data-color-option="'+esc(c.name)+'" aria-pressed="'+(c.name===selectedColor)+'">'+esc(c.name)+(c.stock.length?'':' · loppuunmyyty')+'</button>';}).join('')+'</div><span class="option-label">'+(p.sizes.length===1?'Malli':'Valitse koko')+'</span><div class="sizes">'+p.sizes.map(function(s){return'<button class="size-option" type="button" data-size="'+esc(s)+'" aria-pressed="'+(s===selectedSize)+'" '+(stock.includes(s)?'':'disabled')+'>'+esc(s)+'</button>';}).join('')+'</div><p class="stock '+(stock.length?'':'sold-out')+'" aria-live="polite">'+(stock.length?(stock.length===p.sizes.length?'Saatavilla demossa':stock.join(', ')+' saatavilla demossa'):'Väri loppuunmyyty demossa')+'</p><button class="primary" id="add-product" type="button" '+(selectedSize?'':'disabled')+'>Lisää ostoskoriin · '+money(p.price)+'</button>'+(p.sizes.length>1?'<br><a class="size-guide" href="#kokotaulukko" id="size-guide">Apua koon valintaan</a>':'')+'</div>';
 }
 function renderCart(){
  const count=cart.reduce(function(n,c){return n+c.quantity;},0);qs('#cart-count').textContent=count;qs('#cart-count').hidden=!count;qs('#drawer-count').textContent=count?'· '+count:'';
  const sum=cart.reduce(function(n,c){return n+c.price*c.quantity;},0);qs('#subtotal').textContent=money(sum);qs('#shipping-note').textContent=!sum?'Lisää koriin tuotteita, joista pidät.':sum>=150?'Hienoa, tilauksesi toimitetaan maksutta!':'Lisää vielä '+money(150-sum)+', niin toimitus on ilmainen.';
- qs('#progress').style.width=Math.min(sum/150*100,100)+'%';qs('#cart-footer').style.display=cart.length?'':'none';qs('#cart-disclaimer').textContent=signedInUser?'Paikallinen demotilaus tallentuu tilillesi. Maksua ei veloiteta.':'Kirjaudu sisään tallentaaksesi tilauksen tilillesi. Maksua ei veloiteta.';
+ qs('#progress').style.width=Math.min(sum/150*100,100)+'%';qs('#cart-footer').style.display=cart.length?'':'none';qs('#cart-disclaimer').textContent=stripeCheckoutEnabled?'Testikassa käyttää vain Stripe-testitiliä. Testitapahtumassa ei siirry oikeaa rahaa eikä tilausta toimiteta.':signedInUser?'Paikallinen demotilaus tallentuu tilillesi. Maksua ei veloiteta.':'Kirjaudu sisään tallentaaksesi tilauksen tilillesi. Maksua ei veloiteta.';qs('#stripe-checkout').hidden=!stripeCheckoutEnabled;
  qs('#cart-items').innerHTML=cart.length?cart.map(function(c){return'<article class="cart-line"><img class="cart-image" src="'+esc(c.image)+'" alt="" loading="lazy"><div><p class="cart-name">'+esc(c.name)+'</p><p class="cart-option">'+esc(c.color)+' · '+esc(c.size)+'</p><div class="quantity"><button type="button" aria-label="Vähennä määrää" data-cart="minus" data-key="'+esc(c.key)+'">−</button><span>'+esc(c.quantity)+'</span><button type="button" aria-label="Lisää määrää" data-cart="plus" data-key="'+esc(c.key)+'">+</button></div></div><div class="line-aside"><span class="line-price">'+money(c.price*c.quantity)+'</span><button type="button" class="remove" data-cart="remove" data-key="'+esc(c.key)+'">Poista</button></div></article>';}).join(''):'<div class="cart-empty"><strong>Ostoskorisi odottaa.</strong>Et ole vielä lisännyt tuotteita.<br><button id="continue-shopping" class="primary" style="margin-top:14px" type="button">Tutustu mallistoon →</button></div>';
  try{localStorage.setItem('koivu-cart',JSON.stringify(cart));}catch(e){}
 }
@@ -80,6 +74,8 @@ function addToCart(){
  const p=selectedProduct;if(!p||!selectedSize)return;
  const c=available(p,selectedColor);if(!c.stock.includes(selectedSize)){toast('Valitse saatavilla oleva väri ja koko.');return;}
  const key=p.id+'|'+selectedColor+'|'+selectedSize;const prior=cart.find(function(x){return x.key===key;});
+ if(prior&&prior.quantity>=20){toast('Enintään 20 kappaletta samaa tuotetta.');return;}
+ if(!prior&&cart.length>=24){toast('Ostoskorissa voi olla enintään 24 tuoteriviä.');return;}
  if(prior)prior.quantity++;else cart.push({key:key,id:p.id,name:p.name,color:selectedColor,size:selectedSize,price:p.price,image:p.image,quantity:1});
  const name=p.name;renderCart();closeOverlay();toast(name+' lisätty ostoskoriin');
 }
@@ -121,10 +117,27 @@ async function checkoutCart(){
  finally{isOrdering=false;button.disabled=false;}
 }
 qs('#checkout').addEventListener('click',checkoutCart);
+async function checkoutWithStripe(){
+ if(isOrdering||!cart.length||!stripeCheckoutEnabled)return;
+ if(!signedInUser){pendingStripeCheckout=true;toast('Kirjaudu sisään aloittaaksesi testikassan.');if(!qs('#account-dialog').open)qs('#account-dialog').showModal();await refreshAccount();return;}
+ isOrdering=true;const button=qs('#stripe-checkout');button.disabled=true;
+ try{
+  const response=await fetch(API+'/payments/checkout-session',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({items:cart.map(function(item){return{product_id:item.id,color:item.color,size:item.size,quantity:item.quantity};})})});
+  const result=await response.json().catch(function(){return{};});
+  if(response.status===401){pendingStripeCheckout=true;toast('Kirjaudu sisään aloittaaksesi testikassan.');if(!qs('#account-dialog').open)qs('#account-dialog').showModal();await refreshAccount();return;}
+  if(!response.ok)throw new Error(result.detail||'Testikassaa ei voitu avata.');
+  pendingStripeCheckout=false;try{sessionStorage.setItem('koivu-pending-payment-order',result.order_id);}catch(error){}window.location.assign(result.checkout_url);
+ }catch(error){toast(error.message==='Failed to fetch'?'Backend ei vastaa. Tarkista palvelimen tila.':error.message||'Testikassaa ei voitu avata.');}
+ finally{isOrdering=false;button.disabled=false;}
+}
+qs('#stripe-checkout').addEventListener('click',checkoutWithStripe);
+async function loadPaymentConfig(){try{const response=await fetch(API+'/payments/config');const data=await response.json();stripeCheckoutEnabled=response.ok&&data.test_checkout_enabled===true;renderCart();}catch(error){stripeCheckoutEnabled=false;}}
 let isLoading=false,isInitializing=false,conversationHistory=[];let signedInUser=null;let registerMode=false;let pendingChatMessage=null;
 const WELCOME_MESSAGE='Hei! Olen Koivun AI-assistentti. Autan tuotteissa, koon valinnassa, tyylissä ja ajankohtaisessa tiedossa. Oman tilauksen tarkistus ja asiakaspalvelijalle välitettävä pyyntö vaativat kirjautumisen, jotta voin liittää asian oikeaan tiliin. 🌿';
-function openChat(){const win=qs('#chat-window');if(!win.classList.contains('open')){win.classList.add('open');qs('#chat-toggle').setAttribute('aria-expanded','true');if(!qs('#chat-messages').children.length)initChat();}qs('#chat-input').focus();}
+function setChatOpen(open){const win=qs('#chat-window'),toggle=qs('#chat-toggle'),bubble=qs('#chat-bubble');win.classList.toggle('open',open);bubble.classList.toggle('chat-open',open);toggle.setAttribute('aria-expanded',String(open));toggle.setAttribute('aria-label',open?'Piilota asiakaspalveluchat':'Avaa asiakaspalveluchat');win.setAttribute('aria-hidden',String(!open));win.inert=!open;if(open){if(!qs('#chat-messages').children.length)initChat();window.requestAnimationFrame(function(){qs('#chat-input').focus();});}else if(win.contains(document.activeElement))toggle.focus();}
+function openChat(){setChatOpen(true);}
 qs('#chat-help').addEventListener('click',openChat);
+qs('#footer-chat-link').addEventListener('click',function(event){event.preventDefault();openChat();});
 document.querySelectorAll('[data-demo-prompt]').forEach(function(button){button.addEventListener('click',function(){openChat();const input=qs('#chat-input');input.value=button.dataset.demoPrompt;input.focus();});});
 const supportConsoleLink=qs('#support-console-link');if(supportConsoleLink)supportConsoleLink.href='support.html?apiPort='+API_PORT;
 const supportDemoLink=qs('#support-console-demo-link');if(supportDemoLink)supportDemoLink.href='support.html?apiPort='+API_PORT;
@@ -167,9 +180,9 @@ function queueDemoHumanReply(caseId){
  window.setTimeout(function(){sendDemoSupportReply(caseId);},700);
 }
 function initChat(){if(isInitializing)return;isInitializing=true;if(!conversationHistory.length){addMessage('bot',WELCOME_MESSAGE);conversationHistory.push({role:'assistant',content:WELCOME_MESSAGE});}isInitializing=false;}
-qs('#chat-toggle').addEventListener('click',function(){const open=qs('#chat-window').classList.toggle('open');this.setAttribute('aria-expanded',String(open));if(open&&!qs('#chat-messages').children.length)initChat();if(open)qs('#chat-input').focus();});
-qs('#chat-minimize').addEventListener('click',function(){qs('#chat-window').classList.remove('open');qs('#chat-toggle').setAttribute('aria-expanded','false');});
-qs('#chat-reset').addEventListener('click',function(){if(isLoading||isInitializing)return;pendingChatMessage=null;conversationHistory=[];removeTyping();qs('#chat-messages').replaceChildren();qs('#chat-input').value='';addMessage('bot',WELCOME_MESSAGE);conversationHistory.push({role:'assistant',content:WELCOME_MESSAGE});});
+qs('#chat-toggle').addEventListener('click',function(){setChatOpen(!qs('#chat-window').classList.contains('open'));});
+qs('#chat-minimize').addEventListener('click',function(){setChatOpen(false);});
+document.addEventListener('keydown',function(event){if(event.key==='Escape'&&qs('#chat-window').classList.contains('open')&&!qs('#account-dialog').open)setChatOpen(false);});qs('#chat-reset').addEventListener('click',function(){if(isLoading||isInitializing)return;pendingChatMessage=null;conversationHistory=[];removeTyping();qs('#chat-messages').replaceChildren();qs('#chat-input').value='';addMessage('bot',WELCOME_MESSAGE);conversationHistory.push({role:'assistant',content:WELCOME_MESSAGE});});
 qs('#chat-form').addEventListener('submit',async function(e){
  e.preventDefault();if(isLoading||isInitializing)return;const input=qs('#chat-input'),message=input.value.trim();if(!message)return;input.value='';addMessage('user',message);showTyping();isLoading=true;qs('#chat-send').disabled=true;qs('#chat-reset').disabled=true;
  try{
@@ -199,15 +212,15 @@ async function loadAccountData(){
   const results=await Promise.all([fetch(API+'/orders',{credentials:'include'}),fetch(API+'/support/my-cases',{credentials:'include'})]);
   const orders=results[0].ok?await results[0].json():[];const cases=results[1].ok?await results[1].json():[];
   if(!orders.length){const empty=document.createElement('p');empty.className='account-empty';empty.textContent='Ei demotilauksia vielä.';ordersBox.appendChild(empty);}
-  const orderStatusLabels={processing:'Käsittelyssä',confirmed:'Vahvistettu',shipped:'Lähetetty',delivered:'Toimitettu'};
+  const orderStatusLabels={processing:'Demotilaus tallennettu',confirmed:'Vahvistettu',shipped:'Lähetetty',delivered:'Toimitettu',pending_payment:'Testimaksu odottaa vahvistusta',paid:'Testimaksu vahvistettu · ei oikeaa toimitusta',payment_expired:'Testikassa vanheni'};
   orders.forEach(function(order){
    const row=document.createElement('div');row.className='account-row';
    const strong=document.createElement('strong');strong.textContent=order.id+' · '+(orderStatusLabels[order.status]||order.status);row.appendChild(strong);
    if(order.items&&order.items.length){
     const details=document.createElement('p');details.className='case-question';details.textContent=order.items.map(function(item){return item.quantity+' × '+item.name+' · '+item.color+' · '+item.size;}).join(' / ');row.appendChild(details);
-    if(order.total_cents){const total=document.createElement('p');total.className='case-question';total.textContent='Yhteensä '+money(order.total_cents/100)+' · demo, maksua ei veloitettu';row.appendChild(total);}
+    if(order.total_cents){const total=document.createElement('p');total.className='case-question';total.textContent='Yhteensä '+money(order.total_cents/100)+(order.status==='paid'?' · testitapahtuma, ei oikeaa maksua':' · demohinta');row.appendChild(total);}
    }else{row.appendChild(document.createTextNode(' · vanha demotilaus'));}
-   const cancel=document.createElement('button');cancel.type='button';cancel.className='order-cancel';cancel.textContent='Peru tilaukseni';
+   const cancel=document.createElement('button');cancel.type='button';cancel.className='order-cancel';cancel.textContent='Poista demotilaus';cancel.hidden=['pending_payment','paid'].includes(order.status);
    cancel.addEventListener('click',async function(){
     if(!window.confirm('Perutaanko tämä paikallinen demotilaus? Se poistuu tältä tililtä. Maksua ei ole veloitettu.'))return;
     cancel.disabled=true;
@@ -231,20 +244,39 @@ async function refreshAccount(){
 }
 async function resumePendingChat(){if(!pendingChatMessage||!signedInUser||isLoading)return;const message=pendingChatMessage;pendingChatMessage=null;if(qs('#account-dialog').open)qs('#account-dialog').close();qs('#chat-input').value=message;qs('#chat-form').requestSubmit();}
 async function resumePendingCheckout(){if(!pendingCheckout||!signedInUser||isOrdering)return;pendingCheckout=false;await checkoutCart();}
-qs('#account-open').addEventListener('click',async function(){if(!qs('#account-dialog').open)qs('#account-dialog').showModal();await refreshAccount();await resumePendingChat();await resumePendingCheckout();});
+async function resumePendingStripeCheckout(){if(!pendingStripeCheckout||!signedInUser||isOrdering)return;pendingStripeCheckout=false;await checkoutWithStripe();}
+qs('#account-open').addEventListener('click',async function(){if(!qs('#account-dialog').open)qs('#account-dialog').showModal();await refreshAccount();await resumePendingChat();await resumePendingCheckout();await resumePendingStripeCheckout();});
 qs('#account-mode').addEventListener('click',function(){setAccountMode(!registerMode);});
 qs('#account-form').addEventListener('submit',async function(event){
  event.preventDefault();const email=qs('#account-email').value.trim(),password=qs('#account-password').value;const endpoint=registerMode?'/auth/register':'/auth/login';qs('#account-submit').disabled=true;qs('#account-error').textContent='';
- try{const response=await fetch(API+endpoint,{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,password:password})});const result=await response.json().catch(function(){return{};});if(!response.ok)throw new Error(result.detail||'Kirjautuminen epäonnistui.');qs('#account-password').value='';setAccountMode(false);await refreshAccount();await resumePendingChat();await resumePendingCheckout();}
+ try{const response=await fetch(API+endpoint,{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,password:password})});const result=await response.json().catch(function(){return{};});if(!response.ok)throw new Error(result.detail||'Kirjautuminen epäonnistui.');qs('#account-password').value='';setAccountMode(false);await refreshAccount();await resumePendingChat();await resumePendingCheckout();await resumePendingStripeCheckout();}
  catch(error){qs('#account-error').textContent=error.message==='Failed to fetch'?'Backend ei vastaa. Tarkista palvelimen tila.':error.message||'Kirjautuminen epäonnistui.';}
  finally{qs('#account-submit').disabled=false;}
 });
 qs('#account-cases-reset').addEventListener('click',async function(){if(!signedInUser||!window.confirm('Poistetaanko tämän tilin kaikki demoasiakaspalvelupyynnöt? Tätä ei voi perua.'))return;this.disabled=true;try{const response=await fetch(API+'/support/my-cases/reset',{method:'POST',credentials:'include'});const result=await response.json().catch(function(){return{};});if(!response.ok)throw new Error(result.detail||'Tukipyyntöjä ei voitu nollata.');toast('Nollattiin '+result.deleted+' tukipyyntöä.');await loadAccountData();}catch(error){toast(error.message||'Tukipyyntöjä ei voitu nollata.');}finally{this.disabled=false;}});
 qs('#account-logout').addEventListener('click',async function(){
  this.disabled=true;
- try{await fetch(API+'/auth/logout',{method:'POST',credentials:'include'});signedInUser=null;pendingCheckout=false;pendingChatMessage=null;stopHumanReplyPolling();await refreshAccount();renderCart();toast('Kirjauduit ulos.');}
+ try{await fetch(API+'/auth/logout',{method:'POST',credentials:'include'});signedInUser=null;pendingCheckout=false;pendingStripeCheckout=false;pendingChatMessage=null;stopHumanReplyPolling();await refreshAccount();renderCart();toast('Kirjauduit ulos.');}
  catch(error){toast('Uloskirjautuminen ei onnistunut.');}
  finally{this.disabled=false;}
 });
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!qs('#cart-overlay').hidden){closeOverlay();qs('#cart-toggle').focus();}else if(e.key==='Escape'&&!qs('#product-overlay').hidden){closeOverlay();}});
-refreshAccount();renderProducts();renderFavorites();renderCart();
+async function initializeCatalog(){
+ try{
+  const response=await fetch(API+'/products');
+  if(!response.ok)throw new Error('Tuotekatalogia ei voitu ladata.');
+  const rows=await response.json();
+  if(!Array.isArray(rows)||!rows.length)throw new Error('Tuotekatalogi on tyhjä.');
+  products=rows.map(function(product){return{...product,price:product.price_cents/100};});
+  selectedCardColors=Object.fromEntries(products.map(function(product){return[product.id,firstColor(product).name];}));
+  restoreSavedCart();
+  renderProducts();renderFavorites();renderCart();
+  if(new URLSearchParams(location.search).get('openCart')==='1')openOverlay('#cart-overlay');
+ }catch(error){
+  qs('#product-count').textContent='Tuotekatalogi ei ole käytettävissä';
+  qs('#product-grid').innerHTML='<p class="empty"><strong>Tuotteita ei voitu ladata.</strong>Tarkista, että Koivun API-palvelin on käynnissä, ja päivitä sivu.</p>';
+ }
+}
+function preserveLocalApiPortLinks(){if(!localApiPort)return;document.querySelectorAll('a[href$=".html"],a[href*=".html?"]').forEach(function(link){try{const url=new URL(link.getAttribute('href'),location.href);if(url.origin!==location.origin||url.searchParams.has('apiPort'))return;url.searchParams.set('apiPort',localApiPort);link.setAttribute('href',url.pathname.split('/').pop()+url.search+url.hash);}catch(e){}});}
+async function handlePaymentReturn(){const payment=new URLSearchParams(location.search).get('payment');if(!payment)return;const cleanUrl=location.pathname+(localApiPort?'?apiPort='+encodeURIComponent(localApiPort):'')+location.hash;history.replaceState(null,'',cleanUrl);if(payment==='success'){let orderId='';try{orderId=sessionStorage.getItem('koivu-pending-payment-order')||'';}catch(error){}if(!qs('#account-dialog').open)qs('#account-dialog').showModal();if(!orderId){await refreshAccount();toast('Palasit Stripe-testikassasta. Tilauksen vahvistus näkyy omalla tilillä.');return;}toast('Tarkistetaan testitilauksen vahvistusta…');let status='pending_payment';for(let attempt=0;attempt<6;attempt++){try{const response=await fetch(API+'/orders',{credentials:'include'});if(response.ok){const orders=await response.json();const order=orders.find(function(item){return item.id===orderId;});if(order){status=order.status;if(status!=='pending_payment')break;}}}catch(error){}if(attempt<5)await new Promise(function(resolve){setTimeout(resolve,1200);});}try{sessionStorage.removeItem('koivu-pending-payment-order');}catch(error){}await refreshAccount();if(status==='paid'){cart=[];renderCart();toast('Testimaksu vahvistettiin. Tilausta ei toimiteta.');}else if(status==='payment_expired')toast('Testikassa vanheni eikä maksua vahvistettu.');else toast('Stripe ei ole vielä vahvistanut testitilausta. Tilin tila päivittyy ilmoituksen saavuttua.');}else if(payment==='cancelled'){try{sessionStorage.removeItem('koivu-pending-payment-order');}catch(error){}openOverlay('#cart-overlay');toast('Testikassa suljettiin. Ostoskorisi on tallella.');}}
+preserveLocalApiPortLinks();refreshAccount().then(handlePaymentReturn);initializeCatalog();loadPaymentConfig();

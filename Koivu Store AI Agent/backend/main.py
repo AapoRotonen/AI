@@ -19,9 +19,11 @@ from pydantic import BaseModel, ConfigDict, Field
 from agent.graph import get_agent
 from agent.state import AgentState
 from core.config import Settings, get_settings
+from core.catalog import get_catalog
 from core.database import Database, UserAlreadyExistsError, create_database
 from core.observability import log_event
 from core.orders import OrderStatusService, price_demo_order_items
+from core.payments import StripeCheckoutError, create_test_checkout_session, parse_verified_webhook
 from core.runtime_paths import resolve_frontend_directory
 from core.security import (
     hash_password,
@@ -302,8 +304,8 @@ def create_app(database: Database | None = None, config: Settings | None = None)
         if not active_settings.openai_api_key:
             raise HTTPException(status_code=503, detail="OpenAI-embeddingien avainta ei ole määritetty.")
         retriever = get_retriever()
-        if retriever.get_count() > 0:
-            return {"message": "Tuotekatalogi jo ladattu", "chunks": retriever.get_count()}
+        if retriever.get_vector_count() > 0:
+            return {"message": "Tuotekatalogin vektori-indeksi on jo ladattu", "chunks": retriever.get_vector_count()}
         products_file = Path(__file__).parent / "data" / "products.txt"
         count = retriever.add_text(products_file.read_text(encoding="utf-8"), source="products.txt")
         return {"message": f"Ladattu {count} tuotetietoa", "chunks": count}
@@ -311,6 +313,82 @@ def create_app(database: Database | None = None, config: Settings | None = None)
     @app.get("/products/count")
     def products_count():
         return {"count": get_retriever().get_count()}
+
+    @app.get("/products")
+    def products():
+        """Return public catalogue data; the backend remains authoritative for order prices."""
+        return list(get_catalog())
+
+    @app.get("/payments/config")
+    def payment_config():
+        return {"test_checkout_enabled": active_settings.stripe_test_checkout_enabled}
+
+    @app.post("/payments/checkout-session")
+    def create_test_checkout(
+        payload: CreateDemoOrderRequest,
+        user: dict = Depends(require_user),
+        db: Database = Depends(get_db),
+    ):
+        if not active_settings.stripe_test_checkout_enabled:
+            raise HTTPException(status_code=503, detail="Testikassa ei ole määritetty.")
+        try:
+            items, total_cents = price_demo_order_items([item.model_dump() for item in payload.items])
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        order_id = new_order_reference()
+        order = db.create_order(order_id, user["id"], items, total_cents, status="pending_payment")
+        base_url = active_settings.public_app_url.rstrip("/")
+        try:
+            session = create_test_checkout_session(
+                secret_key=active_settings.stripe_secret_key,
+                idempotency_key=f"koivu-order-{order_id}",
+                order_id=order_id,
+                user_id=user["id"],
+                items=items,
+                success_url=f"{base_url}/?payment=success",
+                cancel_url=f"{base_url}/?payment=cancelled",
+                timeout_seconds=active_settings.provider_timeout_seconds,
+            )
+        except StripeCheckoutError as exc:
+            db.delete_owned_order(order_id, user["id"])
+            log_event("payment_checkout_failed", order_id=order_id)
+            raise HTTPException(status_code=502, detail="Testimaksun istuntoa ei voitu luoda.") from exc
+        if not db.set_checkout_session(order_id, user["id"], session["id"]):
+            db.delete_owned_order(order_id, user["id"])
+            log_event("payment_session_persist_failed", order_id=order_id)
+            raise HTTPException(status_code=503, detail="Testimaksun tilausta ei voitu tallentaa.")
+        log_event("payment_checkout_created", order_id=order_id, user_id=user["id"])
+        return {"checkout_url": session["url"], "order_id": order["id"]}
+
+    @app.post("/payments/webhook")
+    async def stripe_webhook(request: Request, db: Database = Depends(get_db)):
+        if not active_settings.stripe_test_checkout_enabled:
+            raise HTTPException(status_code=503, detail="Maksujen ilmoituspäätepistettä ei ole määritetty.")
+        payload = await request.body()
+        try:
+            event = parse_verified_webhook(
+                payload,
+                request.headers.get("Stripe-Signature", ""),
+                active_settings.stripe_webhook_secret,
+            )
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail="Maksutapahtuman allekirjoitus ei kelpaa.") from exc
+        event_data = event.get("data")
+        session = event_data.get("object") if isinstance(event_data, dict) else None
+        if not isinstance(session, dict):
+            return {"received": True}
+        metadata = session.get("metadata") or {}
+        order_id = metadata.get("order_id") if isinstance(metadata, dict) else None
+        user_id = metadata.get("user_id") if isinstance(metadata, dict) else None
+        session_id = session.get("id")
+        if not all(isinstance(value, str) and value for value in (order_id, user_id, session_id)):
+            return {"received": True}
+        event_type = event["type"]
+        if event_type == "checkout.session.completed" and session.get("payment_status") == "paid":
+            db.mark_order_paid(order_id, user_id, session_id)
+        elif event_type == "checkout.session.expired":
+            db.mark_order_payment_expired(order_id, user_id, session_id)
+        return {"received": True}
 
     @app.post("/auth/register", status_code=201)
     def register(

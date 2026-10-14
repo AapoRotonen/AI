@@ -7,32 +7,11 @@ import re
 from langchain_core.tools import StructuredTool
 from pydantic import BaseModel, Field
 
+from core.catalog import get_catalog_by_id
 from core.database import Database
 
 
-DEMO_STORE_CATALOG: dict[str, dict] = {
-    "merino": {"name": "Merinovillapaita Klassik", "unit_price_cents": 8900, "variants": {
-        "Forest": ("XS", "S", "M", "L", "XL", "XXL"), "Navy": ("XS", "S", "M", "L", "XL", "XXL"),
-        "Charcoal": ("XS", "S", "M", "L", "XL", "XXL"), "Ivory": ("XS", "S", "M", "L", "XL", "XXL"),
-    }},
-    "pellava": {"name": "Pellavahousut Rento", "unit_price_cents": 12000, "variants": {
-        "Beige": ("XS", "S", "M", "L", "XL"), "White": ("XS", "S", "M", "L", "XL"), "Sage": ("XS", "S", "M"), "Camel": (),
-    }},
-    "vyö": {"name": "Nahkavyö Slim", "unit_price_cents": 4500, "variants": {
-        "Cognac": ("75 cm", "80 cm", "85 cm", "90 cm", "95 cm", "100 cm"),
-        "Black": ("75 cm", "80 cm", "85 cm", "90 cm", "95 cm", "100 cm"),
-        "Tan": ("75 cm", "90 cm", "95 cm", "100 cm"),
-    }},
-    "kasmir": {"name": "Kasmirhuivi Luxe", "unit_price_cents": 16000, "variants": {
-        "Forest": ("Yksi koko",), "Camel": ("Yksi koko",), "Dusty Rose": ("Yksi koko",), "Midnight": ("Yksi koko",),
-    }},
-    "denim": {"name": "Denim-takki Vintage", "unit_price_cents": 18500, "variants": {
-        "Washed Blue": ("XS", "S", "M", "L", "XL", "XXL"), "Dark Indigo": ("S", "M", "L"), "Ecru": (),
-    }},
-    "silkki": {"name": "Silkkipaita Elegance", "unit_price_cents": 13500, "variants": {
-        "Ivory": ("XS", "S", "M", "L", "XL"), "Blush": ("XS", "S", "M"), "Champagne": (), "Black": ("XS", "S", "M", "L", "XL"),
-    }},
-}
+DEMO_STORE_CATALOG: dict[str, dict] = get_catalog_by_id()
 
 
 def price_demo_order_items(items: list[dict]) -> tuple[list[dict], int]:
@@ -52,13 +31,14 @@ def price_demo_order_items(items: list[dict]) -> tuple[list[dict], int]:
             raise ValueError("Ostoskorissa on tuntematon tuote tai tuotevalinta.")
         if isinstance(quantity, bool) or not isinstance(quantity, int) or not 1 <= quantity <= 20:
             raise ValueError("Tuotemäärän pitää olla 1–20.")
-        if size not in product["variants"].get(color, ()):
+        variant = next((entry for entry in product["colors"] if entry["name"] == color), None)
+        if variant is None or size not in variant["stock"]:
             raise ValueError("Valitsemasi väri ja koko eivät ole saatavilla.")
         key = (product_id, color, size)
         if key in seen:
             raise ValueError("Poista ostoskorista saman tuotteen päällekkäiset rivit.")
         seen.add(key)
-        unit_price_cents = product["unit_price_cents"]
+        unit_price_cents = product["price_cents"]
         priced_items.append({
             "product_id": product_id, "name": product["name"], "color": color, "size": size,
             "quantity": quantity, "unit_price_cents": unit_price_cents,

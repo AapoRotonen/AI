@@ -8,7 +8,7 @@ The repository contains a static HTML/CSS/JavaScript storefront and a FastAPI ap
 
 The source includes a Docker image, Bicep foundation, manually dispatched deployment workflow, Cosmos DB adapter, and private Blob snapshot restore path. These artifacts do not provision resources on push. There is no operator audit table or seeded customer account; customers register through the demo. The catalog setup route can call the paid OpenAI embeddings API. Local Chroma and SQLite folders are ignored by Git and are not part of a deployment image.
 
-The application remains a portfolio demo: checkout stores synthetic unpaid orders; it does not connect to a commerce, inventory, payment, or real support system.
+The application remains a portfolio demo: checkout stores synthetic orders; an optional Stripe test-mode path can exercise hosted checkout locally, but the Azure workflow does not configure it. There is no live payment, inventory, fulfillment, or real support integration.
 
 ## Target deployment
 

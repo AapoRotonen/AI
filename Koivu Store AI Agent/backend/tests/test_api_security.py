@@ -90,6 +90,27 @@ class ApiSecurityTests(unittest.TestCase):
         weak = self.client.post("/auth/register", json={"email": "weak@example.test", "password": "short"})
         self.assertEqual(weak.status_code, 422)
 
+    def test_public_catalogue_and_order_validation_share_product_prices_and_variants(self):
+        catalog_response = self.client.get("/products")
+        self.assertEqual(catalog_response.status_code, 200)
+        products = catalog_response.json()
+        self.assertEqual(len(products), 18)
+        linen_dress = next(product for product in products if product["id"] == "pellavamekko")
+        self.assertEqual(linen_dress["price_cents"], 14900)
+        self.register()
+
+        accepted = self.client.post("/orders", json={"items": [{
+            "product_id": "pellavamekko", "color": "Natural", "size": "M", "quantity": 2,
+        }]})
+        self.assertEqual(accepted.status_code, 201, accepted.text)
+        self.assertEqual(accepted.json()["total_cents"], 29800)
+        self.assertEqual(accepted.json()["items"][0]["name"], linen_dress["name"])
+
+        rejected = self.client.post("/orders", json={"items": [{
+            "product_id": "pellavamekko", "color": "Natural", "size": "XXL", "quantity": 1,
+        }]})
+        self.assertEqual(rejected.status_code, 422)
+
     def test_order_tool_is_bound_to_authenticated_owner_and_hides_foreign_orders(self):
         first_user = self.register()
         first_order = self.create_order()

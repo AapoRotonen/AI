@@ -157,25 +157,99 @@ class CosmosDatabase:
     def create_demo_order(self, order_id: str, user_id: str) -> dict:
         return self.create_order(order_id, user_id, [], 0)
 
-    def create_order(self, order_id: str, user_id: str, items: list[dict], total_cents: int) -> dict:
+    def create_order(
+        self, order_id: str, user_id: str, items: list[dict], total_cents: int, *, status: str = "processing"
+    ) -> dict:
         item = {
             "id": order_id,
             "user_id": user_id,
-            "status": "processing",
+            "status": status,
             "tracking_code": None,
             "created_at": utc_now(),
             "items": items,
             "total_cents": total_cents,
+            "checkout_session_id": None,
         }
         self.orders.create_item(item)
         return self._to_order(item) or {}
 
+    def _set_payment_order_state(self, order_id: str, user_id: str, session_id: str, status: str) -> bool:
+        try:
+            stored = self.orders.read_item(item=order_id, partition_key=user_id)
+        except Exception as exc:
+            if self._is_sdk_error(exc, "CosmosResourceNotFoundError", 404):
+                return False
+            raise
+        if stored.get("checkout_session_id") != session_id:
+            return False
+        if stored.get("status") == status:
+            return True
+        if stored.get("status") != "pending_payment":
+            return False
+        updated = {**stored, "status": status}
+        try:
+            self.orders.replace_item(
+                item=order_id,
+                body=updated,
+                etag=stored.get("_etag"),
+                match_condition=self.match_condition,
+            )
+        except Exception as exc:
+            if self._is_sdk_error(exc, "CosmosResourceNotFoundError", 404) or getattr(exc, "status_code", None) == 412:
+                return False
+            raise
+        return True
+
+    def set_checkout_session(self, order_id: str, user_id: str, session_id: str) -> bool:
+        try:
+            stored = self.orders.read_item(item=order_id, partition_key=user_id)
+        except Exception as exc:
+            if self._is_sdk_error(exc, "CosmosResourceNotFoundError", 404):
+                return False
+            raise
+        if stored.get("status") != "pending_payment":
+            return False
+        if stored.get("checkout_session_id") == session_id:
+            return True
+        if stored.get("checkout_session_id") is not None:
+            return False
+        try:
+            self.orders.replace_item(
+                item=order_id,
+                body={**stored, "checkout_session_id": session_id},
+                etag=stored.get("_etag"),
+                match_condition=self.match_condition,
+            )
+        except Exception as exc:
+            if self._is_sdk_error(exc, "CosmosResourceNotFoundError", 404) or getattr(exc, "status_code", None) == 412:
+                return False
+            raise
+        return True
+
+    def mark_order_paid(self, order_id: str, user_id: str, session_id: str) -> bool:
+        return self._set_payment_order_state(order_id, user_id, session_id, "paid")
+
+    def mark_order_payment_expired(self, order_id: str, user_id: str, session_id: str) -> bool:
+        return self._set_payment_order_state(order_id, user_id, session_id, "payment_expired")
+
     def delete_owned_order(self, order_id: str, user_id: str) -> bool:
         try:
-            self.orders.delete_item(item=order_id, partition_key=user_id)
+            stored = self.orders.read_item(item=order_id, partition_key=user_id)
+            if stored.get("status") == "paid" or (
+                stored.get("status") == "pending_payment" and stored.get("checkout_session_id") is not None
+            ):
+                return False
+            self.orders.delete_item(
+                item=order_id,
+                partition_key=user_id,
+                etag=stored.get("_etag"),
+                match_condition=self.match_condition,
+            )
             return True
         except Exception as exc:
             if self._is_sdk_error(exc, "CosmosResourceNotFoundError", 404):
+                return False
+            if getattr(exc, "status_code", None) == 412:
                 return False
             raise
 

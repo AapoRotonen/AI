@@ -4,11 +4,12 @@ Koivu Store is a local portfolio demo: a static Finnish storefront calls a FastA
 
 ## Components
 
-- `frontend/` renders the catalogue and chat. Account credentials are sent only to the backend; the browser receives an HttpOnly session cookie. Cart and favourites remain in browser storage; checkout submits product variants to the backend for owner-scoped demo-order persistence.
+- `frontend/catalog.json` is the canonical public sample catalogue. `shop.html` and `product.html?id=...` render searchable categories and shareable product details; `about.html`, `shipping.html`, and `returns.html` explain the demo boundary. Account credentials are sent only to the backend; the browser receives an HttpOnly session cookie. Cart and favourites remain in browser storage.
 - `backend/main.py` validates requests, resolves the session, injects authenticated identity into the workflow, owns API permissions, and persists user/order/support data.
 - `backend/agent/` contains the typed intent and evidence schemas, LangGraph state, nodes, and hard-coded conditional routing.
-- `backend/core/retrieval.py` combines Chroma vector rankings and local BM25 rankings with reciprocal-rank fusion (RRF). Retrieved sources keep internal IDs and product codes.
-- `backend/core/database.py` uses parameterized SQLite operations for local accounts, sessions, product-line demo orders, and support cases. `backend/core/orders.py` validates cart variants and server-side prices and exposes an authenticated owner's order-status lookup.
+- `backend/core/retrieval.py` combines persisted Chroma vector rankings with BM25 rankings built from both Chroma chunks and the current shared JSON catalogue, then fuses them with reciprocal-rank fusion (RRF). The JSON catalogue enters BM25 without paid embedding calls; old Chroma snapshots are not silently replaced.
+- `backend/core/database.py` uses parameterized SQLite operations for local accounts, sessions, product-line demo orders, and support cases. `backend/core/catalog.py` loads the shared catalogue and `backend/core/orders.py` validates cart variants and server-side prices from it.
+- `backend/core/payments.py` optionally creates Stripe-hosted Checkout Sessions using test-mode keys only, verifies webhook signatures against raw bodies, and supports idempotent order-state transitions. Azure deployment does not configure these optional secrets, so the hosted demo keeps test checkout disabled.
 - `backend/evals/` and `backend/tests/` provide retrieval metrics, routing cases, API/security tests, and no-network unit tests.
 
 ## Request routes

@@ -47,9 +47,13 @@ class FakeContainer:
         except KeyError as exc:
             raise CosmosResourceNotFoundError("missing") from exc
 
-    def delete_item(self, item, partition_key):
+    def delete_item(self, item, partition_key, etag=None, match_condition=None):
         try:
-            del self.items[(item, partition_key)]
+            key = (item, partition_key)
+            current = self.items[key]
+            if etag is not None and (etag != current.get("_etag") or match_condition != "IfNotModified"):
+                raise AssertionError("delete must use optimistic concurrency")
+            del self.items[key]
         except KeyError as exc:
             raise CosmosResourceNotFoundError("missing") from exc
 
@@ -165,6 +169,13 @@ class CosmosDatabaseTests(unittest.TestCase):
         self.assertIsNone(self.db.get_owned_order(order["id"], "user-2"))
         self.assertFalse(self.db.delete_owned_order(order["id"], "user-2"))
         self.assertTrue(self.db.delete_owned_order(order["id"], "user-1"))
+
+    def test_payment_orders_cannot_be_deleted_after_checkout_session_exists(self):
+        order = self.db.create_order("ORD-87654321", "user-1", [], 8900, status="pending_payment")
+        self.assertTrue(self.db.set_checkout_session(order["id"], "user-1", "cs_test_demo"))
+        self.assertFalse(self.db.delete_owned_order(order["id"], "user-1"))
+        self.assertTrue(self.db.mark_order_paid(order["id"], "user-1", "cs_test_demo"))
+        self.assertFalse(self.db.delete_owned_order(order["id"], "user-1"))
 
     def test_support_read_is_owner_scoped_and_update_uses_etag(self):
         case = self.db.create_support_case("case-1", "user-1", "Where is my order?", "review", {"intent": "support"})

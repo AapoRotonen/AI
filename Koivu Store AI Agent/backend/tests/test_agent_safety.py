@@ -101,6 +101,8 @@ class AgentSafetyTests(unittest.TestCase):
         self.assertEqual(result["answer"], "Tuote on villaa.")
         prompt = model.return_value.with_structured_output.return_value.invoke.call_args.args[0]
         self.assertIn("untrusted data", prompt[0].content)
+        self.assertIn("portfolio demo", prompt[0].content)
+        self.assertIn("never promise real stock", prompt[0].content)
         self.assertIn("UNTRUSTED CATALOGUE TEXT", prompt[-1].content)
 
     def test_web_search_failure_escalates_without_fabricating_results(self):

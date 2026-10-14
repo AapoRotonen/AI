@@ -2,6 +2,7 @@
 
 from functools import lru_cache
 from typing import Literal
+from urllib.parse import urlsplit
 
 from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -28,6 +29,9 @@ class Settings(BaseSettings):
     cookie_secure: bool = False
     support_agent_api_key: str = ""
     catalog_setup_api_key: str = ""
+    stripe_secret_key: str = ""
+    stripe_webhook_secret: str = ""
+    public_app_url: str = ""
     provider_timeout_seconds: float = 30.0
 
     model_config = SettingsConfigDict(
@@ -39,6 +43,25 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def validate_production_configuration(self):
+        payment_values = (self.stripe_secret_key.strip(), self.stripe_webhook_secret.strip(), self.public_app_url.strip())
+        if any(payment_values) and not all(payment_values):
+            raise ValueError("Stripe test checkout requires STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, and PUBLIC_APP_URL")
+        if self.stripe_secret_key and not self.stripe_secret_key.startswith("sk_test_"):
+            raise ValueError("Only a Stripe test-mode secret key is accepted")
+        if self.stripe_webhook_secret and not self.stripe_webhook_secret.startswith("whsec_"):
+            raise ValueError("STRIPE_WEBHOOK_SECRET must be a Stripe webhook endpoint secret")
+        if self.public_app_url:
+            parsed_app_url = urlsplit(self.public_app_url)
+            if (
+                parsed_app_url.scheme not in {"http", "https"}
+                or not parsed_app_url.netloc
+                or parsed_app_url.username
+                or parsed_app_url.password
+                or parsed_app_url.path not in {"", "/"}
+                or parsed_app_url.query
+                or parsed_app_url.fragment
+            ):
+                raise ValueError("PUBLIC_APP_URL must be an absolute HTTP(S) origin without query or fragment")
         if self.app_environment == "production":
             required = {
                 "OPENAI_API_KEY": self.openai_api_key,
@@ -61,9 +84,15 @@ class Settings(BaseSettings):
                 raise ValueError("CORS_ALLOWED_ORIGINS cannot contain a wildcard")
             if len(self.support_agent_api_key) < 32:
                 raise ValueError("SUPPORT_AGENT_API_KEY must contain at least 32 characters in production")
+            if self.public_app_url and not self.public_app_url.startswith("https://"):
+                raise ValueError("PUBLIC_APP_URL must use HTTPS in production")
         if self.provider_timeout_seconds <= 0:
             raise ValueError("PROVIDER_TIMEOUT_SECONDS must be positive")
         return self
+
+    @property
+    def stripe_test_checkout_enabled(self) -> bool:
+        return bool(self.stripe_secret_key and self.stripe_webhook_secret and self.public_app_url)
 
 
 @lru_cache()

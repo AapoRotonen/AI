@@ -19,7 +19,7 @@
     <a class="privacy-back" href="index.html">← Takaisin Koivu Storeen</a>
     <p class="kicker">DEMOVERSION TIETOSUOJA</p>
     <h1>Tietoa tietojen käsittelystä</h1>
-    <p class="privacy-callout"><strong>Tämä on portfolio- ja demoversio, ei valmis asiakaspalvelukanava.</strong> Älä käytä sitä oikeilla asiakkailla tai lähetä maksutietoja. Paikallisessa ajossa tiedot tallentuvat paikallisesti; pilvijulkaisussa tallennuspaikka ja alue riippuvat käyttöönottajan asetuksista. Varmista käytössä olevan palvelun tietosuojaseloste ennen käyttöä.</p>
+    <p class="privacy-callout"><strong>Tämä on portfolio- ja demoversio, ei valmis asiakaspalvelukanava.</strong> Älä käytä sitä oikeilla asiakkailla tai kirjoita maksutietoja Koivun chattiin. Mahdollinen Stripe-kassa on vain testitilassa: jos testaat sitä, käytä Stripe-testikorttia äläkä oikeaa maksukorttia. Paikallisessa ajossa tiedot tallentuvat paikallisesti; pilvijulkaisussa tallennuspaikka ja alue riippuvat käyttöönottajan asetuksista. Varmista käytössä olevan palvelun tietosuojatiedot ennen käyttöä.</p>
 
     <h2>Tili ja kirjautuminen</h2>
     <p>Rekisteröityessäsi sähköpostiosoitteesi tallennetaan sovelluksen tietokantaan; paikallisessa ajossa se on SQLite ja valmistellussa Azure-tilassa Cosmos DB valitulla Azure-alueella. Salasanaa ei tallenneta sellaisenaan, vaan siitä muodostetaan suolattu tiiviste. Kirjautuminen käyttää HttpOnly-istuntoevästettä; palvelin tallentaa istuntotunnisteesta tiivisteen ja vanhenemistiedon. Tuotantoeväste on Secure ja SameSite=Strict samalla HTTPS-alkuperällä. Paikallisia tilejä ei siirretä automaattisesti Azureen.</p>
@@ -30,7 +30,10 @@
 
     <h2>Demotilaukset ja tukipyynnöt</h2>
     <p>Omat demotilaukset ja tukipyynnöt tallennetaan paikalliseen SQLite-tietokantaan tai valmistellussa Azure-ajossa Cosmos DB:hen. Tilausviitteen ja asiakkaan tukitietojen haku rajataan kirjautuneen käyttäjän omiin tietoihin. Käsittelijänäkymä käyttää yhtä palvelimella määritettyä jaettua avainta; sovelluksessa ei ole henkilökohtaisia käsittelijätunnuksia eikä käsittelijäkohtaista auditointia. Tukipyynnön yleisimmät sähköposti-, puhelin-, korttinumeron kaltaiset ja token-arvot yritetään peittää ennen tallennusta; tunnistus ei ole täydellinen.</p>
-    <p>Tukitapauksia ja demotilauksia ei poisteta automaattisesti; asiakas voi nollata omat demotukipyyntönsä. Istunnot vanhenevat asetetun ajan jälkeen. Sovelluksessa ei ole sähköposti-ilmoituksia, oikeaa tilausten käsittelyä, maksamista tai tuotantokaupan asiakastilejä.</p>
+    <p>Tukitapauksia ja demotilauksia ei poisteta automaattisesti; asiakas voi nollata omat demotukipyyntönsä. Istunnot vanhenevat asetetun ajan jälkeen. Valinnainen Stripe-kassa toimii vain testitunnuksilla. Sovelluksessa ei ole sähköposti-ilmoituksia, oikeaa tilausten käsittelyä, tuotantomaksuja tai tuotantokaupan asiakastilejä.</p>
+
+    <h2>Valinnainen Stripe-testikassa</h2>
+    <p>Jos ylläpitäjä on määrittänyt Stripe-testitunnukset, kassan tuotenimet, määrät, summat sekä sovelluksen sisäiset tilaus- ja käyttäjätunnisteet lähetetään Stripe Checkoutiin. Maksutiedot syötetään Stripen isännöimällä sivulla; Koivu ei vastaanota tai tallenna korttitietoja. Sovellus tallentaa testikassan istuntotunnisteen ja muuttaa tilaustilan maksetuksi vain allekirjoituksen perusteella varmennetun testitapahtuman jälkeen. Testitapahtuma ei siirrä oikeaa rahaa eikä käynnistä toimitusta. Azure-julkaisun nykyinen workflow ei määritä Stripe-tunnuksia, joten kassa on siellä pois käytöstä.</p>
 
     <h2>Lokit ja muu selaintallennus</h2>
     <p>Sovelluksen tapahtumalokeihin tallennetaan teknisiä tietoja kuten pyyntötunnus, reitti, kesto, onnistuminen tai virhe sekä mahdollinen mallin ilmoittama token-määrä. Chat-viestejä, vastauksia, salasanoja, evästeitä tai API-avaimia ei kirjata näihin tapahtumalokeihin. Ostoskori ja suosikit tallentuvat selaimen paikalliseen tallennustilaan. Tuotekuvat haetaan Unsplashista.</p>

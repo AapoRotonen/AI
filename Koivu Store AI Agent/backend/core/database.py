@@ -61,7 +61,8 @@ class Database:
                     tracking_code TEXT,
                     created_at TEXT NOT NULL,
                     items_json TEXT NOT NULL DEFAULT '[]',
-                    total_cents INTEGER NOT NULL DEFAULT 0
+                    total_cents INTEGER NOT NULL DEFAULT 0,
+                    checkout_session_id TEXT
                 );
                 CREATE INDEX IF NOT EXISTS orders_user_id_idx ON orders(user_id);
                 CREATE TABLE IF NOT EXISTS support_cases (
@@ -85,6 +86,8 @@ class Database:
                 db.execute("ALTER TABLE orders ADD COLUMN items_json TEXT NOT NULL DEFAULT '[]'")
             if "total_cents" not in order_columns:
                 db.execute("ALTER TABLE orders ADD COLUMN total_cents INTEGER NOT NULL DEFAULT 0")
+            if "checkout_session_id" not in order_columns:
+                db.execute("ALTER TABLE orders ADD COLUMN checkout_session_id TEXT")
             case_columns = {row["name"] for row in db.execute("PRAGMA table_info(support_cases)").fetchall()}
             if "demo_response" not in case_columns:
                 db.execute("ALTER TABLE support_cases ADD COLUMN demo_response INTEGER NOT NULL DEFAULT 0")
@@ -147,20 +150,71 @@ class Database:
             )
         return self.get_owned_order(order_id, user_id) or {}
 
-    def create_order(self, order_id: str, user_id: str, items: list[dict], total_cents: int) -> dict:
+    def create_order(
+        self, order_id: str, user_id: str, items: list[dict], total_cents: int, *, status: str = "processing"
+    ) -> dict:
         created_at = utc_now()
         with self.connection() as db:
             db.execute(
-                "INSERT INTO orders(id, user_id, status, tracking_code, created_at, items_json, total_cents) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?)",
-                (order_id, user_id, "processing", None, created_at, json.dumps(items, ensure_ascii=False), total_cents),
+                "INSERT INTO orders(id, user_id, status, tracking_code, created_at, items_json, total_cents, checkout_session_id) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, NULL)",
+                (order_id, user_id, status, None, created_at, json.dumps(items, ensure_ascii=False), total_cents),
             )
         return self.get_owned_order(order_id, user_id) or {}
+
+    def set_checkout_session(self, order_id: str, user_id: str, session_id: str) -> bool:
+        with self.connection() as db:
+            cursor = db.execute(
+                "UPDATE orders SET checkout_session_id = ? "
+                "WHERE id = ? AND user_id = ? AND status = 'pending_payment' AND checkout_session_id IS NULL",
+                (session_id, order_id, user_id),
+            )
+            if cursor.rowcount == 1:
+                return True
+            row = db.execute(
+                "SELECT status, checkout_session_id FROM orders WHERE id = ? AND user_id = ?",
+                (order_id, user_id),
+            ).fetchone()
+        return bool(row and row["status"] == "pending_payment" and row["checkout_session_id"] == session_id)
+
+    def mark_order_paid(self, order_id: str, user_id: str, session_id: str) -> bool:
+        with self.connection() as db:
+            cursor = db.execute(
+                "UPDATE orders SET status = 'paid' "
+                "WHERE id = ? AND user_id = ? AND status = 'pending_payment' AND checkout_session_id = ?",
+                (order_id, user_id, session_id),
+            )
+            if cursor.rowcount == 1:
+                return True
+            row = db.execute(
+                "SELECT status, checkout_session_id FROM orders WHERE id = ? AND user_id = ?",
+                (order_id, user_id),
+            ).fetchone()
+        return bool(row and row["status"] == "paid" and row["checkout_session_id"] == session_id)
+
+    def mark_order_payment_expired(self, order_id: str, user_id: str, session_id: str) -> bool:
+        with self.connection() as db:
+            cursor = db.execute(
+                "UPDATE orders SET status = 'payment_expired' "
+                "WHERE id = ? AND user_id = ? AND status = 'pending_payment' AND checkout_session_id = ?",
+                (order_id, user_id, session_id),
+            )
+            if cursor.rowcount == 1:
+                return True
+            row = db.execute(
+                "SELECT status, checkout_session_id FROM orders WHERE id = ? AND user_id = ?",
+                (order_id, user_id),
+            ).fetchone()
+        return bool(row and row["status"] == "payment_expired" and row["checkout_session_id"] == session_id)
 
     def delete_owned_order(self, order_id: str, user_id: str) -> bool:
         """Delete one local demo order only when it belongs to the signed-in user."""
         with self.connection() as db:
-            cursor = db.execute("DELETE FROM orders WHERE id = ? AND user_id = ?", (order_id, user_id))
+            cursor = db.execute(
+                "DELETE FROM orders WHERE id = ? AND user_id = ? "
+                "AND (status NOT IN ('pending_payment', 'paid') OR (status = 'pending_payment' AND checkout_session_id IS NULL))",
+                (order_id, user_id),
+            )
         return cursor.rowcount == 1
 
     def get_owned_order(self, order_id: str, user_id: str) -> dict | None:

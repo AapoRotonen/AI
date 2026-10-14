@@ -7,6 +7,8 @@
 | Scenario | Expected behavior |
 | --- | --- |
 | Product question | Route to RAG only |
+| Product detail from current catalogue | Current `frontend/catalog.json` document is available to BM25 without rebuilding the vector snapshot; prices and availability are identified as demo data |
+| Shipping/returns question | Explain that the website is a demo and contains no live fulfilment, return, or refund service |
 | Authenticated order question | Route to the backend-bound order-status tool |
 | Anonymous order question | Ask the user to log in; do not query an order |
 | External/current question | Use Tavily only when configured |

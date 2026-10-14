@@ -79,6 +79,9 @@ class CloudProbeTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("app-config.js", (await self.client.get("/index.html")).text)
         self.assertIn("apiBaseUrl", (await self.client.get("/app-config.js")).text)
         self.assertEqual((await self.client.get("/support.html")).status_code, 200)
+        for page in ("shop.html", "product.html", "about.html", "shipping.html", "returns.html"):
+            response = await self.client.get("/" + page)
+            self.assertEqual(response.status_code, 200, page)
 
 
 if __name__ == "__main__":

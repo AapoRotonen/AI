@@ -6,15 +6,17 @@ Koivu Store is a Finnish fashion storefront and portfolio demo. The frontend is 
 
 Important areas:
 
-- **frontend/index.html, frontend/store.css, frontend/store.js:** storefront, account panel, order demo, support-case status, and chat API calls.
+- **frontend/index.html, frontend/shop.html, frontend/product.html, frontend/about.html, frontend/shipping.html, frontend/returns.html:** home, category, shareable product, and information pages.
+- **frontend/catalog.json:** canonical public product catalogue read by the storefront, order validation, and the BM25 catalogue corpus.
+- **frontend/store.css, frontend/store.js, frontend/catalog-pages.css, frontend/catalog-pages.js:** storefront, account panel, order demo, and catalogue page interactions.
 - **backend/main.py:** request schemas, CORS/session handling, API authorization, account/order/support routes.
 - **backend/agent/graph.py:** allowlisted LangGraph routes.
 - **backend/agent/nodes.py:** structured intent/evidence/answer calls, RAG, public web search, and the scoped order-status node.
 - **backend/agent/schemas.py, backend/agent/state.py:** model schemas and graph state.
 - **backend/core/database.py:** SQLite repository for users, sessions, demo orders, and support cases.
-- **backend/core/orders.py:** typed least-privilege order-status tool and service.
+- **backend/core/catalog.py, backend/core/orders.py:** shared catalogue loading, server-side order price/variant validation, and typed least-privilege order-status service.
 - **backend/core/retrieval.py, backend/core/retrieval_eval.py:** vector/BM25 retrieval, RRF, metadata, and retrieval metrics.
-- **backend/data/products.txt:** catalogue and policy corpus; backend/data/rag_eval.json and agent_eval.json: labelled evaluation cases.
+- **backend/data/products.txt:** demo-scope and policy corpus for the persisted Chroma seed; `frontend/catalog.json` supplies current product facts. `backend/data/rag_eval.json` and `agent_eval.json` contain labelled evaluation cases.
 - **docs/:** architecture, security, privacy, evaluation, and implementation-status documents.
 
 ## Security invariants
@@ -34,7 +36,7 @@ Chat questions and bounded history may be sent to OpenAI. A question reaches Tav
 
 OpenAI embedding and chat calls can incur cost. Do not run live chat or vector/hybrid retrieval evaluations unless the task explicitly needs them and the provider cost is understood. The normal test suite must stay deterministic and must mock model and web calls.
 
-Do not clear, replace, or migrate backend/chroma_db casually. It may contain persistent product vectors. The setup route requires a server-side catalog key because it can call the paid embeddings API. Keep support and setup credentials out of frontend code.
+Do not clear, replace, or migrate backend/chroma_db casually. It may contain persistent product vectors. The setup route requires a server-side catalog key because it can call the paid embeddings API. Keep support and setup credentials out of frontend code. Optional Stripe checkout must accept only `sk_test_` keys, derive prices from the server catalogue, and verify raw-body webhook signatures before changing order state; never configure live Stripe keys for this demo.
 
 ## Azure deployment and costs
 
@@ -49,11 +51,13 @@ Do not clear, replace, or migrate backend/chroma_db casually. It may contain per
 ## Interfaces to preserve
 
 - POST /chat accepts a message and up to 12 user/assistant history turns.
+- GET /products exposes public sample catalogue data; POST /orders validates every item and recalculates prices from `frontend/catalog.json`.
 - POST /human-chat creates a real support case for a signed-in user; it must not impersonate a human with an LLM.
 - Order and customer support-case reads are scoped to the authenticated owner.
 - Support-agent endpoints require the server-side X-Support-Agent-Key.
 - Catalog setup requires X-Catalog-Setup-Key and the configured OpenAI key.
-- Frontend and backend product facts should remain aligned between frontend/store.js and backend/data/products.txt.
+- Keep public product facts in `frontend/catalog.json`; do not copy the product list into frontend JavaScript or order-validation code. The server recalculates prices from this file. Product facts are demo data, and variant availability is not live inventory.
+- `backend/data/products.txt` remains the source for the persisted Chroma seed corpus. The live catalogue is also added to BM25 at startup without embedding calls; update or replace the persisted Chroma snapshot only through an explicitly cost-aware, reviewed migration.
 
 ## Validation commands
 
@@ -69,6 +73,7 @@ Run from the repository root:
 
 ```powershell
 node --check frontend/store.js
+node --check frontend/catalog-pages.js
 node --check frontend/support-console.js
 node --check frontend/app-config.js
 ```

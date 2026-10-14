@@ -120,7 +120,7 @@ After success, open the printed HTTPS app URL in a normal browser. Verify these 
 5. Create a support case and use the operator view with the server-side support key. Never use real customer content.
 6. Greeting and other deterministic UI paths work. If you explicitly choose to validate live model/search routes, understand that OpenAI/Tavily charges apply and real messages are sent to those providers.
 
-There are no pre-seeded demo accounts. Use registration in the browser. No real payment, inventory, shipment, or production support integration exists.
+There are no pre-seeded demo accounts. Use registration in the browser. The optional Stripe test checkout is not configured by this Azure workflow and therefore stays disabled in the deployed app. No live payment, inventory, shipment, or production support integration exists.
 
 ## 7. Configuration reference
 

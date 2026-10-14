@@ -12,6 +12,7 @@ from chromadb.config import Settings as ChromaSettings
 from langchain_openai import OpenAIEmbeddings
 
 from core.config import get_settings
+from core.catalog import catalog_document, get_catalog
 
 settings = get_settings()
 
@@ -45,12 +46,22 @@ class HybridRetriever:
         self.bm25_index: BM25Okapi | None = None
         self.bm25_documents: List[str] = []
         self.bm25_ids: List[str] = []
+        self.catalog_documents: dict[str, tuple[str, dict]] = {}
         self._rebuild_bm25()
 
     def _rebuild_bm25(self) -> None:
         all_docs = self.collection.get()
-        self.bm25_documents = all_docs.get("documents") or []
-        self.bm25_ids = all_docs.get("ids") or []
+        vector_documents = all_docs.get("documents") or []
+        vector_ids = all_docs.get("ids") or []
+        self.catalog_documents = {
+            f"catalog-{product['sku']}": (
+                catalog_document(product),
+                {"source": "catalog.json", "product_code": product["sku"]},
+            )
+            for product in get_catalog()
+        }
+        self.bm25_documents = vector_documents + [item[0] for item in self.catalog_documents.values()]
+        self.bm25_ids = vector_ids + list(self.catalog_documents)
         tokenized = [doc.lower().split() for doc in self.bm25_documents]
         self.bm25_index = BM25Okapi(tokenized) if tokenized else None
 
@@ -99,12 +110,17 @@ class HybridRetriever:
     ) -> List[Tuple[str, dict, float]]:
         if method not in {"vector", "bm25", "hybrid"}:
             raise ValueError("method must be vector, bm25, or hybrid")
-        count = self.collection.count()
+        vector_count = self.collection.count()
+        count = vector_count + len(self.catalog_documents)
         if count == 0 or top_k <= 0:
             return []
 
         candidate_count = min(top_k * 2, count)
-        vector_ids = self._vector_ids(query, candidate_count) if method in {"vector", "hybrid"} else []
+        vector_ids = (
+            self._vector_ids(query, candidate_count)
+            if vector_count and method in {"vector", "hybrid"}
+            else []
+        )
         bm25_ids = self._bm25_ranked_ids(query, candidate_count) if method in {"bm25", "hybrid"} else []
         if method == "vector":
             ranked_ids = vector_ids[:top_k]
@@ -140,7 +156,8 @@ class HybridRetriever:
     def _fetch_ranked(self, ids: list[str], scores: dict[str, float]) -> List[Tuple[str, dict, float]]:
         if not ids:
             return []
-        docs = self.collection.get(ids=ids, include=["documents", "metadatas"])
+        chroma_ids = [document_id for document_id in ids if document_id not in self.catalog_documents]
+        docs = self.collection.get(ids=chroma_ids, include=["documents", "metadatas"]) if chroma_ids else {}
         by_id = {
             document_id: (document, metadata or {})
             for document_id, document, metadata in zip(
@@ -149,7 +166,7 @@ class HybridRetriever:
         }
         results = []
         for document_id in ids:
-            item = by_id.get(document_id)
+            item = self.catalog_documents.get(document_id) or by_id.get(document_id)
             if item is None:
                 continue
             document, metadata = item
@@ -160,6 +177,10 @@ class HybridRetriever:
         return results
 
     def get_count(self) -> int:
+        return self.collection.count() + len(self.catalog_documents)
+
+    def get_vector_count(self) -> int:
+        """Return only persisted Chroma chunks, excluding deterministic catalogue documents."""
         return self.collection.count()
 
     @staticmethod

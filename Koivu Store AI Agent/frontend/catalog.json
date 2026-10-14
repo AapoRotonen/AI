@@ -1,0 +1,333 @@
+[
+  {
+    "id": "merino",
+    "sku": "KLS-001",
+    "name": "Merinovillapaita Klassik",
+    "material": "100 % merinovilla · 180 g/m²",
+    "price_cents": 8900,
+    "category": "neuleet",
+    "badge": "ARKISUOSIKKI",
+    "image": "https://images.unsplash.com/photo-1577393439344-b89b65dfd169?auto=format&fit=crop&w=760&q=82",
+    "alt": "Neulottu merinovillapaita luonnonläheisessä värissä",
+    "description": "Ajaton merinovillapaita sopii arkeen ja juhlaan. Lämmin mutta hengittävä. Konepesu 30 asteessa.",
+    "care": "Konepesu villapesuohjelmalla 30 asteessa. Kuivaa tasossa.",
+    "sizes": ["XS", "S", "M", "L", "XL", "XXL"],
+    "colors": [
+      {"name": "Forest", "hex": "#385b49", "stock": ["XS", "S", "M", "L", "XL", "XXL"]},
+      {"name": "Navy", "hex": "#344255", "stock": ["XS", "S", "M", "L", "XL", "XXL"]},
+      {"name": "Charcoal", "hex": "#55534f", "stock": ["XS", "S", "M", "L", "XL", "XXL"]},
+      {"name": "Ivory", "hex": "#eae4d7", "stock": ["XS", "S", "M", "L", "XL", "XXL"]}
+    ]
+  },
+  {
+    "id": "pellava",
+    "sku": "PLH-002",
+    "name": "Pellavahousut Rento",
+    "material": "100 % pellava",
+    "price_cents": 12000,
+    "category": "vaatteet",
+    "badge": "LUONNONMATERIAALI",
+    "image": "https://images.unsplash.com/photo-1715233749622-3216fe49e682?auto=format&fit=crop&w=760&q=82",
+    "alt": "Rennosti laskeutuvat pellavahousut",
+    "description": "Väljät, hengittävät pellavahousut lämpimiin päiviin. Konepesu 40 asteessa.",
+    "care": "Konepesu 40 asteessa samanväristen kanssa. Silitys kosteana.",
+    "sizes": ["XS", "S", "M", "L", "XL"],
+    "colors": [
+      {"name": "Beige", "hex": "#c9b99b", "stock": ["XS", "S", "M", "L", "XL"]},
+      {"name": "White", "hex": "#f0eee7", "stock": ["XS", "S", "M", "L", "XL"]},
+      {"name": "Sage", "hex": "#96a390", "stock": ["XS", "S", "M"]},
+      {"name": "Camel", "hex": "#bca27b", "stock": []}
+    ]
+  },
+  {
+    "id": "vyö",
+    "sku": "NVY-003",
+    "name": "Nahkavyö Slim",
+    "material": "Italialainen pehmeä nahka · messinkilukko",
+    "price_cents": 4500,
+    "category": "asusteet",
+    "image": "https://images.pexels.com/photos/6654763/pexels-photo-6654763.jpeg?auto=compress&cs=tinysrgb&w=760",
+    "alt": "Konjakinruskea nahkavyö messinkisoljella",
+    "description": "Pehmeästä nahasta valmistettu kapea vyö. Ajaton messinkilukko sopii housujen ja hameen kanssa.",
+    "care": "Pyyhi pehmeällä, hieman kostealla liinalla. Suojaa pitkäaikaiselta kosteudelta.",
+    "sizes": ["75 cm", "80 cm", "85 cm", "90 cm", "95 cm", "100 cm"],
+    "colors": [
+      {"name": "Cognac", "hex": "#936542", "stock": ["75 cm", "80 cm", "85 cm", "90 cm", "95 cm", "100 cm"]},
+      {"name": "Black", "hex": "#333430", "stock": ["75 cm", "80 cm", "85 cm", "90 cm", "95 cm", "100 cm"]},
+      {"name": "Tan", "hex": "#c9a782", "stock": ["75 cm", "90 cm", "95 cm", "100 cm"]}
+    ]
+  },
+  {
+    "id": "kasmir",
+    "sku": "KSH-004",
+    "name": "Kasmirhuivi Luxe",
+    "material": "100 % mongolialainen kasmir · 200 × 70 cm",
+    "price_cents": 16000,
+    "category": "asusteet",
+    "badge": "PEHMEÄ SUOSIKKI",
+    "image": "https://images.pexels.com/photos/5475167/pexels-photo-5475167.jpeg?auto=compress&cs=tinysrgb&w=760",
+    "alt": "Pehmeästi taiteltuja villahuiveja lähikuvassa",
+    "description": "Pehmeä ja lämmin kaksikerroksisesta kasmirista kudottu huivi. Koko 200 × 70 cm.",
+    "care": "Käsinpesu kylmässä vedessä villapesuaineella tai kuivapesu.",
+    "sizes": ["Yksi koko"],
+    "colors": [
+      {"name": "Forest", "hex": "#41584a", "stock": ["Yksi koko"]},
+      {"name": "Camel", "hex": "#b79b74", "stock": ["Yksi koko"]},
+      {"name": "Dusty Rose", "hex": "#c9a5a2", "stock": ["Yksi koko"]},
+      {"name": "Midnight", "hex": "#444e5f", "stock": ["Yksi koko"]}
+    ]
+  },
+  {
+    "id": "denim",
+    "sku": "DTK-005",
+    "name": "Denim-takki Vintage",
+    "material": "100 % puuvilla · 12 oz denim",
+    "price_cents": 18500,
+    "category": "vaatteet",
+    "image": "https://images.unsplash.com/photo-1559475464-ffe519cfb9f1?auto=format&fit=crop&w=760&q=82",
+    "alt": "Klassinen sininen denimtakki",
+    "description": "Vintagetyylinen denimtakki, jossa on neljä taskua ja metallinapit.",
+    "care": "Konepesu nurinpäin 30 asteessa. Ilmakuivaus.",
+    "sizes": ["XS", "S", "M", "L", "XL", "XXL"],
+    "colors": [
+      {"name": "Washed Blue", "hex": "#697b8d", "stock": ["XS", "S", "M", "L", "XL", "XXL"]},
+      {"name": "Dark Indigo", "hex": "#354256", "stock": ["S", "M", "L"]},
+      {"name": "Ecru", "hex": "#ddd7c9", "stock": []}
+    ]
+  },
+  {
+    "id": "silkki",
+    "sku": "SLK-006",
+    "name": "Silkkipaita Elegance",
+    "material": "100 % mulberry-silkki · 19 momme",
+    "price_cents": 13500,
+    "category": "vaatteet",
+    "badge": "HARKITTU VALINTA",
+    "image": "https://images.pexels.com/photos/10512893/pexels-photo-10512893.jpeg?auto=compress&cs=tinysrgb&w=760",
+    "alt": "Malli hillityssä roosansävyisessä silkkipaidassa",
+    "description": "Pehmeästi laskeutuvaa mulberry-silkkiä. Klassinen paita juhlaan tai arkeen.",
+    "care": "Käsinpesu viileässä vedessä tai kemiallinen pesu. Tarkista vaatteen pesuohje.",
+    "sizes": ["XS", "S", "M", "L", "XL"],
+    "colors": [
+      {"name": "Ivory", "hex": "#eee8dc", "stock": ["XS", "S", "M", "L", "XL"]},
+      {"name": "Blush", "hex": "#ddbab8", "stock": ["XS", "S", "M"]},
+      {"name": "Champagne", "hex": "#c9b898", "stock": []},
+      {"name": "Black", "hex": "#393934", "stock": ["XS", "S", "M", "L", "XL"]}
+    ]
+  },
+  {
+    "id": "merino-neuletakki",
+    "sku": "KOV-007",
+    "name": "Merinoneuletakki Havu",
+    "material": "100 % merinovilla",
+    "price_cents": 12900,
+    "category": "neuleet",
+    "badge": "UUTUUS",
+    "image": "https://images.pexels.com/photos/30721292/pexels-photo-30721292.jpeg?auto=compress&cs=tinysrgb&w=760",
+    "alt": "Malli vihreässä neuletakissa kasvien keskellä",
+    "description": "Kevyt napitettava neuletakki kerrospukeutumiseen. Suora malli ja ribbineulos hihansuissa.",
+    "care": "Tuuleta käytön jälkeen. Tarvittaessa hellävarainen villapesu 30 asteessa.",
+    "sizes": ["XS", "S", "M", "L", "XL"],
+    "colors": [
+      {"name": "Moss", "hex": "#71816c", "stock": ["XS", "S", "M", "L", "XL"]},
+      {"name": "Oat", "hex": "#d3c7af", "stock": ["XS", "S", "M", "L"]},
+      {"name": "Ink", "hex": "#3d4852", "stock": ["S", "M", "L", "XL"]}
+    ]
+  },
+  {
+    "id": "pipo",
+    "sku": "KOV-008",
+    "name": "Merinopipo Lumi",
+    "material": "100 % merinovilla · kaksinkertainen resori",
+    "price_cents": 3900,
+    "category": "asusteet",
+    "image": "https://images.pexels.com/photos/4929253/pexels-photo-4929253.jpeg?auto=compress&cs=tinysrgb&w=760",
+    "alt": "Malli valkoisessa neulotussa pipossa",
+    "description": "Lämmin, joustava pipo viileisiin päiviin. Yksi koko sopii useimmille.",
+    "care": "Käsinpesu viileässä vedessä. Kuivaa tasossa.",
+    "sizes": ["Yksi koko"],
+    "colors": [
+      {"name": "Oat", "hex": "#d3c7af", "stock": ["Yksi koko"]},
+      {"name": "Forest", "hex": "#385b49", "stock": ["Yksi koko"]},
+      {"name": "Black", "hex": "#333430", "stock": ["Yksi koko"]}
+    ]
+  },
+  {
+    "id": "pellavamekko",
+    "sku": "KOV-009",
+    "name": "Pellavamekko Aava",
+    "material": "100 % pellava",
+    "price_cents": 14900,
+    "category": "vaatteet",
+    "badge": "KESÄN KLASSIKKO",
+    "image": "https://images.pexels.com/photos/12108706/pexels-photo-12108706.jpeg?auto=compress&cs=tinysrgb&w=760",
+    "alt": "Malli väljässä pellavamekossa vihreiden kasvien keskellä",
+    "description": "Polvipituinen, väljälinjainen mekko sivutaskuilla. Vyötärön voi säätää mukana tulevalla nauhalla.",
+    "care": "Konepesu 40 asteessa samanväristen kanssa. Silitys kosteana.",
+    "sizes": ["XS", "S", "M", "L", "XL"],
+    "colors": [
+      {"name": "Natural", "hex": "#d6cbb7", "stock": ["XS", "S", "M", "L", "XL"]},
+      {"name": "Sage", "hex": "#96a390", "stock": ["XS", "S", "M", "L"]},
+      {"name": "Navy", "hex": "#344255", "stock": ["S", "M", "L", "XL"]}
+    ]
+  },
+  {
+    "id": "puuvillapaita",
+    "sku": "KOV-010",
+    "name": "Puuvillapaita Perus",
+    "material": "100 % luomupuuvilla · 210 g/m²",
+    "price_cents": 3900,
+    "category": "vaatteet",
+    "image": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=760&q=82",
+    "alt": "Yksinkertainen puuvillainen t-paita",
+    "description": "Pehmeä, hieman paksumpi t-paita suoralla unisex-mallilla. Helppo yhdistää kerrospukeutumiseen.",
+    "care": "Konepesu 40 asteessa samanväristen kanssa. Pese ja silitä nurinpäin.",
+    "sizes": ["XS", "S", "M", "L", "XL", "XXL"],
+    "colors": [
+      {"name": "White", "hex": "#f0eee7", "stock": ["XS", "S", "M", "L", "XL", "XXL"]},
+      {"name": "Black", "hex": "#333430", "stock": ["XS", "S", "M", "L", "XL", "XXL"]},
+      {"name": "Clay", "hex": "#ad7968", "stock": ["XS", "S", "M", "L"]}
+    ]
+  },
+  {
+    "id": "villakangastakki",
+    "sku": "KOV-011",
+    "name": "Villakangastakki Sumu",
+    "material": "80 % villa · 20 % kierrätetty polyesteri",
+    "price_cents": 25900,
+    "category": "vaatteet",
+    "badge": "AJATON MALLI",
+    "image": "https://images.pexels.com/photos/19169191/pexels-photo-19169191.jpeg?auto=compress&cs=tinysrgb&w=760",
+    "alt": "Pitkä takki hillityssä vaaleassa sävyssä",
+    "description": "Polvipituinen, väljä villakangastakki piilonapilla ja kahdella etutaskulla. Vuoriton malli.",
+    "care": "Ammattilaisen kuivapesu. Tuuleta ja harjaa kevyesti käytön jälkeen.",
+    "sizes": ["XS", "S", "M", "L", "XL"],
+    "colors": [
+      {"name": "Camel", "hex": "#bca27b", "stock": ["XS", "S", "M", "L", "XL"]},
+      {"name": "Charcoal", "hex": "#55534f", "stock": ["S", "M", "L", "XL"]}
+    ]
+  },
+  {
+    "id": "nahkalaukku",
+    "sku": "KOV-012",
+    "name": "Nahkalaukku Olka",
+    "material": "Kasviparkittu nahka · säädettävä olkahihna",
+    "price_cents": 16900,
+    "category": "laukut",
+    "image": "https://images.pexels.com/photos/27204286/pexels-photo-27204286.jpeg?auto=compress&cs=tinysrgb&w=760",
+    "alt": "Kompakti olkalaukku konjakinruskeana",
+    "description": "Kompakti arkilaukku vetoketjulla, sisätaskulla ja säädettävällä hihnalla. Mahtuu puhelin, lompakko ja avaimet.",
+    "care": "Pyyhi kuivalla tai hieman kostealla liinalla. Nahka patinoituu käytössä.",
+    "sizes": ["Yksi koko"],
+    "colors": [
+      {"name": "Cognac", "hex": "#936542", "stock": ["Yksi koko"]},
+      {"name": "Black", "hex": "#333430", "stock": ["Yksi koko"]}
+    ]
+  },
+  {
+    "id": "kangaskassi",
+    "sku": "KOV-013",
+    "name": "Kangaskassi Kierto",
+    "material": "100 % puuvillakanvas · 380 g/m²",
+    "price_cents": 2900,
+    "category": "laukut",
+    "badge": "ARKIPÄIVÄÄN",
+    "image": "https://images.pexels.com/photos/35685413/pexels-photo-35685413.jpeg?auto=compress&cs=tinysrgb&w=760",
+    "alt": "Kestävä kangaskassi arkikäyttöön",
+    "description": "Tilava kangaskassi sisätaskulla ja pitkällä olkahihnalla. Sopii ostoksille ja työpäivän tavaroille.",
+    "care": "Konepesu 30 asteessa. Muotoile kosteana ja kuivaa ilmavasti.",
+    "sizes": ["Yksi koko"],
+    "colors": [
+      {"name": "Natural", "hex": "#d6cbb7", "stock": ["Yksi koko"]},
+      {"name": "Forest", "hex": "#385b49", "stock": ["Yksi koko"]},
+      {"name": "Black", "hex": "#333430", "stock": ["Yksi koko"]}
+    ]
+  },
+  {
+    "id": "nahkatennarit",
+    "sku": "KOV-014",
+    "name": "Nahkatennarit Selko",
+    "material": "Nahkapäällinen · kierrätetty kumipohja",
+    "price_cents": 11900,
+    "category": "kengät",
+    "image": "https://images.unsplash.com/photo-1608384177866-0bca0d225435?auto=format&fit=crop&w=760&q=82",
+    "alt": "Matalavartiset vaaleat tennarit",
+    "description": "Selkeälinjaiset matalavartiset tennarit pehmustetulla pohjallisella. Nauhoitus ja irrotettava pohjallinen.",
+    "care": "Puhdista nahalle sopivalla hoitoaineella. Älä pese koneessa.",
+    "sizes": ["36", "37", "38", "39", "40", "41", "42"],
+    "colors": [
+      {"name": "White", "hex": "#f0eee7", "stock": ["36", "37", "38", "39", "40", "41", "42"]},
+      {"name": "Sand", "hex": "#c9b99b", "stock": ["36", "37", "38", "39", "40"]}
+    ]
+  },
+  {
+    "id": "villahuivi",
+    "sku": "KOV-015",
+    "name": "Villahuivi Saarni",
+    "material": "80 % villa · 20 % polyamidi",
+    "price_cents": 7900,
+    "category": "asusteet",
+    "image": "https://images.pexels.com/photos/19522564/pexels-photo-19522564.jpeg?auto=compress&cs=tinysrgb&w=760",
+    "alt": "Malli harmaassa villahuivissa talvisessa maisemassa",
+    "description": "Kevyt mutta lämmin huivi hapsureunalla. Koko 180 × 35 cm.",
+    "care": "Tuuleta. Tarvittaessa käsinpesu viileässä vedessä.",
+    "sizes": ["Yksi koko"],
+    "colors": [
+      {"name": "Stone", "hex": "#aaa69a", "stock": ["Yksi koko"]},
+      {"name": "Forest", "hex": "#385b49", "stock": ["Yksi koko"]},
+      {"name": "Rust", "hex": "#a76850", "stock": ["Yksi koko"]}
+    ]
+  },
+  {
+    "id": "villahame",
+    "sku": "KOV-016",
+    "name": "Villasekoitehame Aamu",
+    "material": "70 % villa · 30 % kierrätetty polyesteri",
+    "price_cents": 9900,
+    "category": "vaatteet",
+    "image": "https://images.pexels.com/photos/20182111/pexels-photo-20182111.jpeg?auto=compress&cs=tinysrgb&w=760",
+    "alt": "Polvipituinen klassinen hame",
+    "description": "Polvipituinen A-linjainen hame sivuvetoketjulla. Taskuton, vuoriton malli.",
+    "care": "Ammattilaisen kuivapesu. Tarkista vaatteen pesuohje.",
+    "sizes": ["XS", "S", "M", "L", "XL"],
+    "colors": [
+      {"name": "Charcoal", "hex": "#55534f", "stock": ["XS", "S", "M", "L", "XL"]},
+      {"name": "Camel", "hex": "#bca27b", "stock": ["XS", "S", "M", "L"]}
+    ]
+  },
+  {
+    "id": "sukat",
+    "sku": "KOV-017",
+    "name": "Merinosukat Pehmeä",
+    "material": "72 % merinovilla · 26 % polyamidi · 2 % elastaani",
+    "price_cents": 1900,
+    "category": "asusteet",
+    "image": "https://images.pexels.com/photos/6513973/pexels-photo-6513973.jpeg?auto=compress&cs=tinysrgb&w=760",
+    "alt": "Vaaleanharmaat villasukat pehmeällä taustalla",
+    "description": "Pehmeät merinosekoitesukat vahvistetulla kantapäällä ja kärjellä.",
+    "care": "Konepesu villapesuohjelmalla 30 asteessa.",
+    "sizes": ["35–38", "39–42", "43–46"],
+    "colors": [
+      {"name": "Oat", "hex": "#d3c7af", "stock": ["35–38", "39–42", "43–46"]},
+      {"name": "Forest", "hex": "#385b49", "stock": ["35–38", "39–42"]},
+      {"name": "Charcoal", "hex": "#55534f", "stock": ["35–38", "39–42", "43–46"]}
+    ]
+  },
+  {
+    "id": "pellavapaita",
+    "sku": "KOV-018",
+    "name": "Pellavapaita Raita",
+    "material": "55 % pellava · 45 % puuvilla",
+    "price_cents": 8900,
+    "category": "vaatteet",
+    "image": "https://images.pexels.com/photos/1310449/pexels-photo-1310449.jpeg?auto=compress&cs=tinysrgb&w=760",
+    "alt": "Malli sinivalkoraidallisessa kauluspaidassa",
+    "description": "Rennosti istuva pitkähihainen paita, jossa on rintatasku ja pyöristetty helma.",
+    "care": "Konepesu 30 asteessa samanväristen kanssa. Silitys kosteana.",
+    "sizes": ["XS", "S", "M", "L", "XL"],
+    "colors": [
+      {"name": "Blue Stripe", "hex": "#71869a", "stock": ["XS", "S", "M", "L", "XL"]},
+      {"name": "Natural Stripe", "hex": "#c6bba6", "stock": ["XS", "S", "M", "L"]}
+    ]
+  }
+]

@@ -98,7 +98,7 @@ The system preserves hybrid retrieval, exposes three retrieval methods to the ev
 
 - No rate limit, login lockout, email verification, password reset, MFA, CSRF token workflow, account deletion, retention job, encrypted database, managed backup, or multiserver session store.
 - The support operator key is shared and actions are not attributable to individual staff users. Cases are polled through an API; there is no notification or SLA.
-- The order database contains only synthetic fixture orders, not commerce or payment data.
+- Orders remain synthetic and are not connected to commerce or fulfillment. The current code can store a Stripe test-session ID and test payment state; it never handles card details or live payments.
 - Pattern-based case sanitization is incomplete. Chat messages/history may contain personal information and are sent to OpenAI; Tavily receives the question on the external route.
 - Source-ID validation checks that references were supplied, not that every generated claim is semantically entailed.
 - The existing Chroma collection is preserved. Existing stored metadata is not migrated; product-code fallback is derived from retrieved text.
