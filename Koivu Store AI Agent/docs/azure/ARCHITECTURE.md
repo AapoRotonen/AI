@@ -19,7 +19,7 @@ flowchart LR
   Browser[Customer browser] -->|HTTPS, same origin| ACA[Azure Container Apps<br/>FastAPI + static frontend]
   ACA -->|managed identity, data plane RBAC| Cosmos[Cosmos DB for NoSQL<br/>serverless]
   ACA -->|managed identity, Blob Data Reader| Blob[Private Blob container<br/>versioned Chroma ZIP]
-  ACA -->|API key secret| OpenAI[OpenAI API<br/>gpt-4o + embeddings]
+  ACA -->|API key secret| OpenAI[OpenAI API<br/>gpt-6-luna + embeddings]
   ACA -->|optional API key secret| Tavily[Tavily Search API]
   ACA -->|container image pull, AcrPull| ACR[Azure Container Registry<br/>Basic]
   ACA --> Logs[Log Analytics<br/>30-day retention]

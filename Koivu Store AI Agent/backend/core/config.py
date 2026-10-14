@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     database_backend: Literal["sqlite", "cosmos"] = "sqlite"
     openai_api_key: str = ""
     tavily_api_key: str = ""
-    model_name: str = "gpt-4o"
+    model_name: str = "gpt-6-luna"
     embedding_model: str = "text-embedding-3-small"
     temperature: float = 0.0
     chroma_persist_dir: str = "./chroma_db"
